@@ -1,0 +1,738 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Kuis Sirkulasi Darah</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Konsep tata letak: dua warna sirkulasi. Merah arteri (darah beroksigen) untuk aksi dan jawaban terpilih, biru vena untuk informasi dan kemajuan. Satu kolom soal dengan panel daftar soal di samping pada layar lebar. */
+:root {
+  --bg: #F2F6FB; --surface: #FFFFFF; --surface2: #E9F0F8; --ink: #0F1B2D; --muted: #536077; --line: #D5DEEA;
+  --art: #C4122F; --art-ink: #FFFFFF; --art-soft: #FCE7EB;
+  --ven: #1E4FBF; --ven-soft: #E3ECFB;
+  --ok: #0F7A55; --ok-soft: #DAF2E8;
+  --warn: #A24D08; --warn-soft: #FCEAD3;
+  --display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A101C; --surface: #121B2C; --surface2: #1A2539; --ink: #E7ECF6; --muted: #9AA7BE; --line: #27344D;
+    --art: #FF6176; --art-ink: #1A0509; --art-soft: #3A1822;
+    --ven: #86A8FF; --ven-soft: #182648;
+    --ok: #46D3A0; --ok-soft: #0F2F26;
+    --warn: #F2A154; --warn-soft: #37230F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A101C; --surface: #121B2C; --surface2: #1A2539; --ink: #E7ECF6; --muted: #9AA7BE; --line: #27344D;
+  --art: #FF6176; --art-ink: #1A0509; --art-soft: #3A1822;
+  --ven: #86A8FF; --ven-soft: #182648;
+  --ok: #46D3A0; --ok-soft: #0F2F26;
+  --warn: #F2A154; --warn-soft: #37230F;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); min-height: 100vh; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+.in { width: 100%; max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+:focus-visible { outline: 3px solid var(--ven); outline-offset: 2px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* header */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-block: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; margin-right: auto; }
+.brand b { font-family: var(--display); font-size: 18px; display: block; line-height: 1.1; }
+.brand small { color: var(--muted); font-size: 12px; display: block; }
+.ecg { width: 44px; height: 28px; flex: none; }
+.ecg path { fill: none; stroke: var(--art); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 120; stroke-dashoffset: 120; animation: ecg 2.4s linear infinite; }
+@keyframes ecg { 0% { stroke-dashoffset: 120; } 55% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -120; } }
+.tabs { display: flex; gap: 4px; background: var(--surface2); padding: 3px; border-radius: 10px; }
+.tabs button { border: 0; background: transparent; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--muted); }
+.tabs button[aria-current="page"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.who { display: flex; align-items: center; gap: 8px; background: var(--ven-soft); color: var(--ven); border-radius: 999px; padding: 5px 14px; font-weight: 700; font-size: 14px; max-width: 100%; min-width: 0; }
+.who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.who i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex: none; }
+.clock { font-family: var(--mono); font-weight: 700; font-size: 16px; padding: 5px 12px; border-radius: 999px; background: var(--surface2); }
+.clock.low { background: var(--warn-soft); color: var(--warn); }
+.clock.crit { background: var(--art-soft); color: var(--art); animation: beat 1s ease-in-out infinite; }
+@keyframes beat { 50% { transform: scale(1.06); } }
+.prog { height: 4px; background: var(--line); }
+.prog i { display: block; height: 100%; width: 0; background: var(--art); transition: width .35s ease; }
+
+/* generic */
+.page { padding-block: 24px 64px; display: grid; gap: 20px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; min-width: 0; }
+.card > h2 { font-size: 20px; margin-bottom: 12px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--line); background: var(--surface); padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 15px; transition: transform .12s, background .15s, border-color .15s; }
+.btn:hover { border-color: var(--ven); }
+.btn:active { transform: translateY(1px); }
+.btn.art { background: var(--art); color: var(--art-ink); border-color: var(--art); }
+.btn.art:hover { filter: brightness(1.08); }
+.btn.ven { background: var(--ven); color: var(--surface); border-color: var(--ven); }
+.btn.ghost { background: transparent; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.chip { display: inline-block; background: var(--surface2); color: var(--muted); border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.bad { background: var(--art-soft); color: var(--art); }
+.chip.ven { background: var(--ven-soft); color: var(--ven); }
+.note { border-radius: 10px; padding: 10px 14px; font-size: 14px; background: var(--ven-soft); color: var(--ink); border: 1px solid var(--line); }
+.note.warn { background: var(--warn-soft); }
+.note.bad { background: var(--art-soft); }
+.note.ok { background: var(--ok-soft); }
+.note .btn { margin-top: 8px; padding: 6px 12px; font-size: 14px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--art); }
+.scroll { overflow-x: auto; max-width: 100%; }
+
+/* start */
+.hero { display: grid; gap: 14px; padding-top: 8px; }
+.hero h1 { font-size: clamp(34px, 7vw, 60px); font-weight: 800; }
+.hero p { color: var(--muted); max-width: 62ch; font-size: 17px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.facts .chip { font-size: 13px; padding: 4px 12px; }
+.split { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 880px) { .split { grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); align-items: start; } }
+.idcard { border-color: var(--art); border-width: 2px; }
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-weight: 700; font-size: 14px; }
+.field input { font: inherit; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; min-width: 0; }
+.field input:focus { border-color: var(--ven); outline: none; box-shadow: 0 0 0 3px var(--ven-soft); }
+.err { color: var(--art); font-size: 14px; min-height: 20px; margin-bottom: 8px; font-weight: 600; }
+.tplist { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.tplist li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.tplist b.tpc { font-family: var(--mono); font-size: 13px; background: var(--ven-soft); color: var(--ven); border-radius: 8px; padding: 4px 0; text-align: center; }
+.tplist small { color: var(--muted); font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+.how { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); font-size: 15px; }
+
+/* quiz */
+.quiz { display: grid; gap: 20px; padding-block: 20px 64px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 940px) { .quiz { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; } .pal { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 86px); } }
+.qcard { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 16px; animation: slide .28s ease both; min-width: 0; }
+@keyframes slide { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+.qhead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.qno { font-family: var(--display); font-weight: 800; font-size: 26px; margin-right: 6px; }
+.qno small { color: var(--muted); font-size: 16px; font-weight: 600; margin-left: 2px; }
+.stim { background: var(--surface2); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; font-size: 15px; }
+.stim p { margin: 0; }
+.stim table, .tbl { border-collapse: collapse; width: 100%; font-size: 14px; }
+.stim th, .stim td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; background: var(--surface); }
+.stim th { background: var(--ven-soft); color: var(--ven); font-weight: 700; }
+.qtext { font-weight: 700; font-size: 17px; }
+.opts { display: grid; gap: 10px; }
+.opt { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; text-align: left; width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; cursor: pointer; transition: border-color .15s, background .15s, transform .12s; }
+.opt:hover { border-color: var(--ven); transform: translateX(2px); }
+.opt .lt { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-weight: 700; background: var(--surface2); transition: background .15s, color .15s; }
+.opt[aria-checked="true"] { border-color: var(--art); background: var(--art-soft); }
+.opt[aria-checked="true"] .lt { background: var(--art); color: var(--art-ink); animation: pop .25s ease; }
+@keyframes pop { 50% { transform: scale(1.25); } }
+.qnav { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.qnav .sp { flex: 1; }
+.hint { color: var(--muted); font-size: 13px; }
+.pal { display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.pal h3 { font-size: 16px; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; }
+.pn { position: relative; height: 38px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface); cursor: pointer; font-family: var(--mono); font-weight: 700; font-size: 13px; padding: 0; }
+.pn.done { background: var(--ven-soft); border-color: var(--ven); color: var(--ven); }
+.pn.cur { outline: 2.5px solid var(--art); outline-offset: 1px; }
+.pn.fl::after { content: ""; position: absolute; top: 3px; right: 3px; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+.pn.ok { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.pn.no { background: var(--art-soft); border-color: var(--art); color: var(--art); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); list-style: none; margin: 0; padding: 0; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1.5px solid var(--line); }
+.legend .a { background: var(--ven-soft); border-color: var(--ven); }
+.legend .b { background: var(--warn); border-color: var(--warn); border-radius: 50%; }
+.legend .c { border-color: var(--art); }
+
+/* modal + toast */
+.veil { position: fixed; inset: 0; background: rgba(8, 12, 22, .6); z-index: 40; display: grid; place-items: center; padding: 16px; }
+.dlg { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; width: 100%; max-width: 440px; display: grid; gap: 14px; animation: slide .2s ease both; }
+.dlg h2 { font-size: 22px; }
+.dlg .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+.dlg textarea { width: 100%; min-height: 140px; font: 13px var(--mono); background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 600; font-size: 14px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 50; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* result */
+.res { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 820px) { .res.two { grid-template-columns: 300px minmax(0, 1fr); align-items: start; } }
+.ringbox { display: grid; justify-items: center; gap: 10px; text-align: center; position: relative; overflow: hidden; }
+.ring { width: 180px; height: 180px; }
+.ring circle { fill: none; stroke-width: 12; }
+.ring .tr { stroke: var(--surface2); }
+.ring .fg { stroke: var(--art); stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 1.2s cubic-bezier(.2, .8, .2, 1); }
+.ring.pass .fg { stroke: var(--ok); }
+.ringnum { position: absolute; top: 20px; left: 0; right: 0; height: 180px; display: grid; place-content: center; font-family: var(--display); font-weight: 800; font-size: 52px; line-height: 1; }
+.ringnum small { display: block; font-family: var(--body); font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-top: 4px; }
+.dl { display: grid; grid-template-columns: auto auto; gap: 4px 20px; justify-content: center; font-size: 14px; color: var(--muted); text-align: left; }
+.dl b { color: var(--ink); text-align: right; font-family: var(--mono); }
+.bars { display: grid; gap: 12px; }
+.bar2 { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; font-size: 14px; }
+.bar2 .t { grid-column: 1 / -1; height: 10px; background: var(--surface2); border-radius: 6px; overflow: hidden; }
+.bar2 .t i { display: block; height: 100%; background: var(--ven); border-radius: 6px; width: 0; transition: width .9s ease; }
+.bar2 .t i.hi { background: var(--ok); }
+.bar2 .t i.lo { background: var(--art); }
+.bar2 b { font-family: var(--mono); font-size: 13px; }
+.burst { position: absolute; inset: 0; pointer-events: none; }
+.burst i { position: absolute; bottom: -20px; width: 14px; height: 14px; border-radius: 50%; background: var(--art); opacity: 0; animation: rise 2.4s ease-out forwards; }
+@keyframes rise { 10% { opacity: .8; } 100% { transform: translateY(-260px) scale(.6); opacity: 0; } }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ven); border-color: var(--ven); color: var(--surface); }
+.keygrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap: 6px; }
+.kc { border: 1.5px solid var(--line); border-radius: 8px; padding: 4px 6px; display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 13px; background: var(--surface); }
+.kc span { color: var(--muted); font-size: 11px; }
+.kc b { font-size: 15px; }
+.kc.ok { border-color: var(--ok); background: var(--ok-soft); }
+.kc.no { border-color: var(--art); background: var(--art-soft); }
+.kc.bl { border-style: dashed; }
+details.ex { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+details.ex + details.ex { margin-top: 8px; }
+details.ex summary { cursor: pointer; padding: 10px 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-weight: 700; list-style: none; }
+details.ex summary::-webkit-details-marker { display: none; }
+details.ex .body { padding: 4px 14px 16px; display: grid; gap: 12px; }
+.xo { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); font-size: 15px; }
+.xo.key { background: var(--ok-soft); border-color: var(--ok); }
+.xo.mine { background: var(--art-soft); border-color: var(--art); }
+.xo b { font-family: var(--mono); }
+.expl { background: var(--ven-soft); border-radius: 10px; padding: 10px 14px; font-size: 14px; }
+
+/* dashboard */
+.stats { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline; }
+.stats div { display: grid; }
+.stats b { font-family: var(--display); font-size: 30px; line-height: 1.1; }
+.stats span { font-size: 12px; color: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tools input, .tools select { font: inherit; padding: 8px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); min-width: 0; }
+.tools .sp { flex: 1; }
+.tbl th, .tbl td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; white-space: nowrap; }
+.tbl th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.tbl td.nm { white-space: normal; min-width: 150px; font-weight: 700; }
+.tbl tr.r { cursor: pointer; }
+.tbl tr.r:hover td { background: var(--surface2); }
+.nv { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-weight: 700; }
+.nv i { display: inline-block; height: 8px; width: 60px; background: var(--surface2); border-radius: 5px; overflow: hidden; vertical-align: middle; }
+.nv i s { display: block; height: 100%; background: var(--ven); }
+.nv i s.hi { background: var(--ok); }
+.nv i s.lo { background: var(--art); }
+.detail td { background: var(--surface2); white-space: normal !important; }
+.detail .keygrid { margin: 10px 0; }
+.items { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; }
+.it { display: grid; grid-template-columns: 28px minmax(0, 1fr) 40px; gap: 6px; align-items: center; font-size: 12px; font-family: var(--mono); }
+.it .t { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+.it .t i { display: block; height: 100%; background: var(--ven); }
+.it .t i.lo { background: var(--art); }
+.it .t i.hi { background: var(--ok); }
+.empty { text-align: center; color: var(--muted); padding: 32px 12px; }
+
+@media (max-width: 520px) {
+  .tabs button { padding: 6px 9px; font-size: 13px; }
+  .qcard, .card { padding: 16px; }
+  .clock { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .ecg path { stroke-dashoffset: 0; }
+}
+</style>
+
+<div id="app"></div>
+<div id="modal"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+'use strict';
+var BANK = [{"tp": 1, "j": "Literasi", "c": "C4", "s": "Seorang laki-laki 45 tahun mengeluh lemas dan mudah lelah. Hasil pemeriksaan darah rutin:\n|Parameter|Hasil|Nilai normal|\n|Hemoglobin|8 g/dL|13–17 g/dL|\n|Eritrosit|3,1 juta/µL|4,5–5,9 juta/µL|\n|Leukosit|7.000/µL|4.000–10.000/µL|\n|Trombosit|250.000/µL|150.000–450.000/µL|", "q": "Kesimpulan yang paling tepat berdasarkan data tersebut adalah ...", "o": ["Pasien mengalami leukemia karena sel darah putihnya abnormal sehingga daya tahan tubuh menurun", "Pasien mengalami trombositopenia sehingga luka sulit berhenti berdarah dan tubuh mudah lemas", "Pasien mengalami polisitemia sehingga darah menjadi kental dan beban kerja jantung meningkat", "Pasien mengalami anemia sehingga kemampuan darah mengangkut O₂ menurun, sedangkan fungsi imun dan pembekuan darah masih normal", "Pasien mengalami infeksi bakteri akut karena kadar leukosit dan trombosit meningkat"], "k": 3, "e": "Hb dan eritrosit berada di bawah rentang normal (anemia), sedangkan leukosit dan trombosit normal. Lemas terjadi karena pasokan O₂ ke jaringan berkurang."}, {"tp": 1, "j": "Numerasi", "c": "C4", "s": "Volume darah total seorang dewasa ±5 liter. Hasil pemeriksaan menunjukkan nilai hematokrit 45%.", "q": "Hematokrit menyatakan persentase volume sel darah terhadap volume darah total. Volume plasma darah orang tersebut adalah ...", "o": ["2,25 liter", "4,50 liter", "3,25 liter", "1,75 liter", "2,75 liter"], "k": 4, "e": "Volume sel = 45% × 5 L = 2,25 L. Volume plasma = 5 − 2,25 = 2,75 L (55% dari volume darah)."}, {"tp": 1, "j": "Penalaran", "c": "C4", "s": "Seorang atlet tinggal dan berlatih di dataran tinggi (±3.000 m dpl) selama 3 minggu. Pemeriksaan menunjukkan jumlah eritrosit dan hematokritnya lebih tinggi daripada sebelum berlatih.", "q": "Penjelasan fisiologis yang paling tepat adalah ...", "o": ["Tekanan parsial O₂ yang rendah merangsang hati menghasilkan fibrinogen sehingga jumlah eritrosit bertambah", "Udara dingin memicu limpa menghancurkan lebih banyak eritrosit tua sehingga jumlah eritrosit di darah naik", "Kadar CO₂ yang tinggi merangsang kelenjar timus membentuk eritrosit baru", "Tekanan parsial O₂ yang rendah memicu ginjal melepas eritropoietin sehingga sumsum tulang merah meningkatkan produksi eritrosit", "Tubuh menambah volume plasma sehingga jumlah eritrosit per µL darah meningkat"], "k": 3, "e": "Hipoksia di dataran tinggi mendorong ginjal melepaskan eritropoietin (EPO) yang merangsang eritropoiesis di sumsum tulang merah. Penambahan plasma justru akan mengencerkan eritrosit."}, {"tp": 1, "j": "Numerasi", "c": "C4", "s": "Umur rata-rata eritrosit manusia ±120 hari. Seorang dewasa memiliki sekitar 25 triliun (2,5 × 10¹³) eritrosit dan jumlahnya relatif konstan.", "q": "Agar jumlah eritrosit tetap konstan, sumsum tulang harus membentuk eritrosit baru per hari sekitar ...", "o": ["2,1 × 10¹¹ sel", "2,1 × 10¹⁰ sel", "2,1 × 10¹² sel", "3,0 × 10¹⁵ sel", "1,2 × 10¹⁴ sel"], "k": 0, "e": "Laju pembentukan = 2,5 × 10¹³ ÷ 120 ≈ 2,1 × 10¹¹ sel per hari, sama dengan laju penghancuran eritrosit tua di limpa dan hati."}, {"tp": 1, "j": "Numerasi", "c": "C4", "s": "Seorang anak demam tinggi. Hitung leukosit total 15.000/µL dengan hitung jenis:\n|Jenis leukosit|Persentase|Nilai normal absolut|\n|Neutrofil|80%|2.500–7.000/µL|\n|Limfosit|12%|1.000–4.000/µL|\n|Monosit|5%|200–800/µL|\n|Eosinofil|2%|0–500/µL|\n|Basofil|1%|0–100/µL|", "q": "Jumlah neutrofil absolut dan interpretasinya adalah ...", "o": ["12.000/µL, di atas normal (limfositosis) sehingga mengarah pada infeksi virus", "1.800/µL, dalam batas normal sehingga tidak ada infeksi", "750/µL, di atas normal sehingga mengarah pada reaksi alergi", "12.000/µL, di atas normal (neutrofilia) sehingga mengarah pada infeksi bakteri akut", "300/µL, di bawah normal (neutropenia) sehingga daya tahan tubuh menurun"], "k": 3, "e": "Neutrofil absolut = 80% × 15.000 = 12.000/µL, melebihi 7.000/µL (neutrofilia), ciri respons fagositik terhadap infeksi bakteri akut. Angka 1.800 adalah limfosit, 750 monosit, 300 eosinofil."}, {"tp": 1, "j": "Penalaran", "c": "C4", "s": "Seorang pasien menjalani terapi antibiotik spektrum luas dalam waktu lama. Bakteri usus penghasil vitamin K ikut berkurang. Beberapa minggu kemudian pasien mudah memar dan luka kecil lama berhenti berdarah, padahal jumlah trombositnya normal.", "q": "Penyebab yang paling mungkin adalah ...", "o": ["Fibrinogen tidak dapat diubah menjadi protrombin karena ion Ca²⁺ berlebih", "Trombosit gagal beragregasi karena kekurangan hemoglobin", "Sintesis protrombin di hati menurun sehingga pembentukan trombin dan fibrin terhambat", "Eritrosit pecah sehingga trombosit tidak dapat menutup luka", "Leukosit memakan fibrin sebelum jaring bekuan sempat terbentuk"], "k": 2, "e": "Vitamin K dibutuhkan hati untuk membuat protrombin dan beberapa faktor pembekuan. Tanpanya, trombin dan fibrin sulit terbentuk walau trombosit normal."}, {"tp": 1, "j": "Literasi", "c": "C4", "s": "Seorang pasien diare berat tanpa penggantian cairan. Hematokrit awal 42%. Setelah 2 hari dehidrasi, hematokrit menjadi 55%, sedangkan jumlah eritrosit absolut dalam tubuh tidak berubah.", "q": "Peningkatan hematokrit tersebut terjadi karena ...", "o": ["Sumsum tulang membentuk eritrosit dua kali lebih banyak dalam dua hari", "Volume plasma berkurang sehingga proporsi sel darah terhadap volume darah meningkat dan darah menjadi lebih kental", "Leukosit berubah menjadi eritrosit untuk menggantikan cairan yang hilang", "Volume plasma bertambah sehingga eritrosit menjadi lebih encer", "Hemoglobin larut ke dalam plasma sehingga volume sel meningkat"], "k": 1, "e": "Jumlah eritrosit tetap, tetapi plasma berkurang (hemokonsentrasi), sehingga persentase sel naik dan darah mengental. Jantung harus bekerja lebih berat."}, {"tp": 1, "j": "Numerasi", "c": "C4", "s": "Pada darah sehat, perbandingan jumlah eritrosit : leukosit : trombosit ≈ 700 : 1 : 40. Seorang pasien memiliki leukosit 7.000/µL. Nilai normal eritrosit 4,5–5,9 juta/µL dan trombosit 150.000–450.000/µL.", "q": "Jika perbandingan tersebut berlaku, jumlah eritrosit dan trombosit pasien serta interpretasinya adalah ...", "o": ["4,9 juta/µL dan 28.000/µL; trombositopenia", "490.000/µL dan 280.000/µL; anemia", "4,9 juta/µL dan 700.000/µL; trombositosis", "4,9 juta/µL dan 280.000/µL; keduanya normal", "49 juta/µL dan 280.000/µL; polisitemia"], "k": 3, "e": "Eritrosit = 7.000 × 700 = 4.900.000/µL; trombosit = 7.000 × 40 = 280.000/µL. Keduanya berada dalam rentang normal."}, {"tp": 1, "j": "Penalaran", "c": "C5", "s": "Sebuah simulasi membandingkan sel berbentuk cakram bikonkaf dengan bola yang volumenya sama. Hasilnya, cakram bikonkaf memiliki luas permukaan lebih besar dan lebih mudah berubah bentuk saat melewati celah sempit.", "q": "Evaluasi yang paling tepat tentang kesesuaian bentuk tersebut dengan fungsi eritrosit adalah ...", "o": ["Bentuk bikonkaf memungkinkan eritrosit membelah diri di dalam kapiler", "Bentuk bikonkaf membuat eritrosit dapat menembus dinding kapiler untuk memfagosit bakteri", "Luas permukaan besar menyimpan lebih banyak inti sel sehingga sintesis hemoglobin lebih cepat", "Bentuk bikonkaf mengurangi kemampuan mengikat O₂ tetapi mempercepat aliran darah", "Luas permukaan besar mempercepat difusi O₂ dan CO₂, dan bentuk yang lentur memudahkan eritrosit melewati kapiler yang sempit"], "k": 4, "e": "Eritrosit mamalia tidak berinti dan berbentuk bikonkaf: permukaan luas untuk difusi gas, lentur untuk melewati kapiler, dan ruang dalam sel lebih banyak untuk hemoglobin."}, {"tp": 1, "j": "Literasi", "c": "C4", "s": "Data pasien demam berdarah dengue (DBD):\n|Parameter|Hari ke-1|Hari ke-4|\n|Trombosit|180.000/µL|40.000/µL|\n|Hematokrit|38%|48%|", "q": "Interpretasi yang paling tepat adalah ...", "o": ["Trombosit turun sehingga risiko perdarahan meningkat, dan hematokrit naik karena plasma bocor keluar dari kapiler (hemokonsentrasi)", "Trombosit turun karena bekuan darah berlebihan, dan hematokrit naik karena produksi eritrosit meningkat", "Trombosit dan hematokrit berubah akibat respons imun yang efektif sehingga pasien membaik", "Trombosit turun karena eritrosit hancur, dan hematokrit naik karena volume plasma bertambah", "Kenaikan hematokrit menandakan pasien kelebihan cairan sehingga infus harus dihentikan"], "k": 0, "e": "Virus dengue menurunkan trombosit dan meningkatkan permeabilitas kapiler. Plasma bocor sehingga hematokrit naik; pasien perlu pemantauan dan penggantian cairan."}, {"tp": 2, "j": "Numerasi", "c": "C4", "s": "Seorang ayah bergolongan darah A heterozigot (IᴬIᵒ) menikah dengan ibu bergolongan darah B heterozigot (IᴮIᵒ).", "q": "Peluang pasangan tersebut memiliki anak perempuan bergolongan darah O adalah ...", "o": ["12,5%", "25%", "50%", "6,25%", "37,5%"], "k": 0, "e": "Peluang golongan O (IᵒIᵒ) = ¼. Peluang anak perempuan = ½. Peluang keduanya = ¼ × ½ = ⅛ = 12,5%."}, {"tp": 2, "j": "Literasi", "c": "C4", "s": "Uji penentuan golongan darah seorang pasien:\n|Serum uji|Hasil|\n|Anti-A|Menggumpal|\n|Anti-B|Tidak menggumpal|\n|Anti-Rh|Menggumpal|", "q": "Donor sel darah merah (PRC) yang kompatibel untuk pasien tersebut adalah ...", "o": ["A⁺ dan AB⁺ saja", "B⁺, B⁻, O⁺, dan O⁻", "A⁺, A⁻, O⁺, dan O⁻", "A⁺, B⁺, AB⁺, dan O⁺", "Hanya A⁺"], "k": 2, "e": "Pasien bergolongan A Rh⁺ (antigen A dan Rh ada), plasmanya mengandung anti-B. Eritrosit donor tidak boleh membawa antigen B: A⁺, A⁻, O⁺, O⁻ aman."}, {"tp": 2, "j": "Penalaran", "c": "C5", "s": "Seorang ibu Rh⁻ melahirkan anak pertama Rh⁺ tanpa masalah. Pada kehamilan kedua dengan janin Rh⁺, janin mengalami anemia hemolitik berat (eritroblastosis fetalis).", "q": "Penjelasan yang paling tepat adalah ...", "o": ["Ibu Rh⁻ membentuk antigen Rh pada kehamilan kedua sehingga eritrosit ibu menggumpal", "Janin Rh⁺ menghasilkan antibodi anti-Rh yang menyerang eritrosit ibu sejak kehamilan pertama", "Saat persalinan pertama darah janin Rh⁺ masuk ke sirkulasi ibu sehingga ibu membentuk antibodi anti-Rh yang pada kehamilan berikutnya melewati plasenta dan menghancurkan eritrosit janin", "Antibodi anti-Rh sudah ada sejak lahir pada ibu Rh⁻ sehingga kehamilan pertama pun selalu berbahaya", "Plasenta mencampur darah ibu dan janin sejak awal kehamilan sehingga anak pertama juga selalu sakit"], "k": 2, "e": "Sensitisasi terjadi saat darah janin Rh⁺ bercampur dengan darah ibu Rh⁻ (umumnya saat persalinan). Antibodi IgG anti-Rh pada kehamilan berikutnya melewati plasenta dan menghemolisis eritrosit janin."}, {"tp": 2, "j": "Numerasi", "c": "C4", "s": "Seorang pasien memiliki Hb 7 g/dL dan perlu dinaikkan hingga 10 g/dL. Pedoman: satu kantong sel darah merah pekat (PRC) ±250 mL menaikkan Hb ±1 g/dL. Transfusi diberikan dengan laju 150 mL/jam.", "q": "Total volume PRC yang dibutuhkan dan lama transfusi seluruhnya adalah ...", "o": ["750 mL dan 3 jam", "500 mL dan 3,3 jam", "1.000 mL dan 6,7 jam", "250 mL dan 1,7 jam", "750 mL dan 5 jam"], "k": 4, "e": "Kenaikan Hb = 10 − 7 = 3 g/dL sehingga butuh 3 kantong = 750 mL. Lama = 750 mL ÷ 150 mL/jam = 5 jam."}, {"tp": 2, "j": "Literasi", "c": "C4", "s": "Hemofilia A disebabkan kekurangan faktor VIII pembekuan darah. Gen penyebabnya resesif dan terpaut kromosom X (Xʰ). Seorang laki-laki penderita hemofilia (XʰY) menikah dengan perempuan normal homozigot (XᴴXᴴ).", "q": "Pernyataan yang benar tentang anak-anak mereka adalah ...", "o": ["Semua anak laki-laki hemofilia dan semua anak perempuan normal", "Separuh anak laki-laki hemofilia dan separuh anak perempuan pembawa sifat", "Semua anak, laki-laki dan perempuan, normal serta tidak membawa gen hemofilia", "Semua anak perempuan hemofilia dan semua anak laki-laki pembawa sifat", "Semua anak perempuan pembawa sifat (XᴴXʰ) dan semua anak laki-laki normal"], "k": 4, "e": "Ayah menurunkan Xʰ kepada semua anak perempuan (XᴴXʰ, pembawa) dan Y kepada anak laki-laki, yang menerima Xᴴ dari ibu (XᴴY, normal)."}, {"tp": 2, "j": "Penalaran", "c": "C4", "s": "Sampel darah ditampung dalam dua tabung. Tabung 1 diberi natrium sitrat (pengikat ion Ca²⁺), tabung 2 tanpa tambahan. Setelah 15 menit, darah di tabung 2 membeku, sedangkan darah di tabung 1 tetap cair.", "q": "Penjelasan yang paling tepat adalah ...", "o": ["Ca²⁺ diperlukan untuk mengubah fibrin menjadi fibrinogen sehingga tanpa Ca²⁺ jaring bekuan tidak terbentuk", "Ca²⁺ diperlukan untuk mengubah protrombin menjadi trombin sehingga tanpa Ca²⁺ fibrinogen tidak berubah menjadi fibrin", "Sitrat menghancurkan trombosit sehingga tidak ada faktor yang tersisa untuk pembekuan", "Sitrat mengaktifkan antibodi dalam plasma yang menggumpalkan eritrosit sehingga darah tetap cair", "Sitrat mengikat vitamin K sehingga protrombin langsung rusak di dalam tabung"], "k": 1, "e": "Ion Ca²⁺ (faktor IV) diperlukan agar protrombin menjadi trombin. Tanpa Ca²⁺ aktif, fibrinogen tidak diubah menjadi fibrin sehingga darah tetap cair. Karena itu sitrat dipakai sebagai antikoagulan sampel."}, {"tp": 2, "j": "Numerasi", "c": "C4", "s": "Waktu pembekuan darah (menit) lima pasien: P = 5; Q = 12; R = 8; S = 20; T = 6. Rentang normal 4–10 menit.", "q": "Rata-rata waktu pembekuan dan persentase pasien di luar rentang normal adalah ...", "o": ["10,2 menit dan 20%", "9,0 menit dan 40%", "10,2 menit dan 40%", "10,2 menit dan 60%", "51 menit dan 40%"], "k": 2, "e": "Rata-rata = (5 + 12 + 8 + 20 + 6) ÷ 5 = 51 ÷ 5 = 10,2 menit. Pasien Q dan S berada di luar rentang: 2 dari 5 = 40%."}, {"tp": 2, "j": "Penalaran", "c": "C5", "s": "Golongan darah O⁻ sering disebut donor universal untuk eritrosit. Namun seorang dokter menolak mentransfusikan darah lengkap golongan O dalam jumlah besar kepada pasien bergolongan AB.", "q": "Alasan paling tepat penolakan tersebut adalah ...", "o": ["Eritrosit donor O memiliki antigen A dan B sehingga ditolak sistem imun pasien AB", "Plasma donor O mengandung antibodi anti-A dan anti-B yang dapat menggumpalkan eritrosit pasien AB bila jumlahnya besar", "Plasma pasien AB mengandung antibodi anti-A dan anti-B yang menyerang eritrosit donor O", "Eritrosit golongan O tidak memiliki hemoglobin sehingga tidak dapat mengangkut O₂", "Golongan O hanya dapat diterima oleh sesama golongan O"], "k": 1, "e": "Status donor universal berlaku untuk eritrosit (tanpa antigen A/B). Darah lengkap juga membawa plasma yang berisi anti-A dan anti-B; dalam volume besar dapat menyerang eritrosit pasien AB."}, {"tp": 2, "j": "Literasi", "c": "C5", "s": "Seorang pasien fibrilasi atrium diberi warfarin, obat antikoagulan yang bekerja sebagai antagonis vitamin K. Dokter berpesan agar pasien menjaga asupan sayuran hijau (kaya vitamin K) tetap konsisten dan tidak tiba-tiba menambahnya dalam jumlah besar.", "q": "Alasan yang paling tepat berdasarkan mekanisme pembekuan darah adalah ...", "o": ["Vitamin K berlebih merusak trombosit sehingga pasien berisiko mengalami perdarahan hebat", "Vitamin K berlebih memulihkan sintesis faktor pembekuan di hati sehingga efek warfarin melemah dan risiko terbentuknya trombus meningkat", "Vitamin K berlebih mengikat ion Ca²⁺ sehingga bekuan darah tidak terbentuk", "Vitamin K berlebih mengubah fibrin menjadi fibrinogen sehingga bekuan larut", "Sayuran hijau menurunkan jumlah eritrosit sehingga warfarin tidak dapat bekerja"], "k": 1, "e": "Warfarin menghambat pemakaian vitamin K untuk sintesis faktor pembekuan. Lonjakan vitamin K dari makanan melawan efek obat, sehingga dosis efektif berubah dan risiko bekuan naik."}, {"tp": 2, "j": "Numerasi", "c": "C4", "s": "Data golongan darah 400 siswa suatu sekolah: golongan O 40%, A 28%, B 25%, AB 7%. Sebanyak 98% populasi bersifat Rh⁺, dan Rh⁻ dianggap tersebar merata pada tiap golongan.", "q": "Perkiraan banyak siswa bergolongan darah O Rh⁻ adalah ...", "o": ["8 siswa", "32 siswa", "6 siswa", "16 siswa", "3 siswa"], "k": 4, "e": "400 × 40% × 2% = 400 × 0,40 × 0,02 = 3,2 ≈ 3 siswa. Golongan ini penting karena O⁻ adalah donor universal untuk eritrosit."}, {"tp": 3, "j": "Numerasi", "c": "C4", "s": "Curah jantung = denyut jantung × volume sekuncup. Seorang dewasa dengan denyut 75 kali/menit dan volume sekuncup 70 mL memiliki curah jantung 5,25 L/menit. Seorang atlet memiliki curah jantung istirahat yang sama, tetapi denyut jantungnya 50 kali/menit.", "q": "Volume sekuncup atlet tersebut dan maknanya adalah ...", "o": ["105 mL; jantung atlet lebih efisien karena tiap denyut memompa lebih banyak darah", "70 mL; jantung atlet sama efisiennya dengan orang biasa", "52,5 mL; jantung atlet bekerja lebih lemah tetapi lebih cepat", "150 mL; jantung atlet memompa dua kali lebih banyak darah per menit", "75 mL; jantung atlet memerlukan waktu diastol yang lebih singkat"], "k": 0, "e": "Volume sekuncup = 5.250 mL ÷ 50 = 105 mL. Jantung atlet memompa lebih banyak per denyut sehingga denyut istirahatnya lebih rendah."}, {"tp": 3, "j": "Penalaran", "c": "C4", "s": "Seorang pasien mengalami stenosis katup mitral (katup bikuspid menyempit) sehingga darah sulit mengalir dari atrium kiri ke ventrikel kiri. Pasien mengeluh sesak napas dan batuk, terutama saat berbaring.", "q": "Dampak langsung yang paling mungkin menjelaskan keluhan tersebut adalah ...", "o": ["Darah menumpuk di atrium kanan sehingga vena kava membengkak dan hati mengecil", "Darah menumpuk di atrium kiri dan vena pulmonalis sehingga tekanan kapiler paru naik dan cairan merembes ke alveolus", "Darah kaya O₂ langsung mengalir ke ventrikel kanan sehingga kadar O₂ di paru meningkat", "Ventrikel kiri berkontraksi lebih kuat sehingga tekanan aorta meningkat tajam", "Darah dari ventrikel kanan kembali ke atrium kanan sehingga aliran ke paru berhenti total"], "k": 1, "e": "Hambatan di katup mitral menaikkan tekanan atrium kiri, lalu vena dan kapiler paru. Cairan merembes ke alveolus (edema paru) sehingga muncul sesak, terutama saat berbaring."}, {"tp": 3, "j": "Numerasi", "c": "C5", "s": "Satu siklus jantung pada denyut 75 kali/menit berlangsung 0,8 detik: sistol atrium 0,1 detik, sistol ventrikel 0,3 detik, dan diastol umum 0,4 detik. Saat berolahraga, denyut meningkat menjadi 100 kali/menit; lama sistol ventrikel relatif tetap.", "q": "Durasi satu siklus saat olahraga dan akibatnya terhadap pengisian ventrikel adalah ...", "o": ["0,6 detik; fase sistol memanjang sehingga pengisian ventrikel bertambah", "0,8 detik; semua fase tetap sehingga curah jantung tidak berubah", "1,0 detik; fase diastol memanjang sehingga pengisian ventrikel meningkat", "0,6 detik; fase diastol memendek sehingga waktu pengisian ventrikel berkurang", "0,6 detik; ketiga fase memendek sama besar sehingga pengisian tidak berubah"], "k": 3, "e": "Durasi siklus = 60 ÷ 100 = 0,6 detik. Karena sistol relatif tetap, pemendekan terutama terjadi pada diastol sehingga waktu pengisian ventrikel berkurang."}, {"tp": 3, "j": "Literasi", "c": "C4", "s": "Bunyi jantung normal terdengar “lub-dup”. “Lub” terjadi akibat menutupnya katup atrioventrikular pada awal sistol ventrikel, “dup” akibat menutupnya katup semilunar pada awal diastol. Seorang pasien memperlihatkan bunyi desir “swish” tepat setelah “lub” (saat sistol), paling jelas terdengar di apeks jantung.", "q": "Dugaan yang paling tepat adalah ...", "o": ["Katup mitral tidak menutup rapat sehingga darah mengalir balik dari ventrikel kiri ke atrium kiri saat sistol", "Katup aorta tidak membuka sempurna sehingga darah terhambat keluar saat diastol", "Katup trikuspid menutup terlalu cepat sehingga atrium kanan selalu kosong", "Katup pulmonalis bocor sehingga darah masuk ke atrium kiri saat diastol", "Septum antaratrium menutup sempurna sehingga bunyi “dup” menghilang"], "k": 0, "e": "Desir saat sistol di apeks menunjukkan aliran balik melalui katup mitral yang tidak rapat (insufisiensi/regurgitasi mitral) dari ventrikel kiri ke atrium kiri."}, {"tp": 3, "j": "Penalaran", "c": "C4", "s": "Tekanan puncak ventrikel kiri ±120 mmHg, sedangkan ventrikel kanan ±25 mmHg. Dinding otot ventrikel kiri sekitar tiga kali lebih tebal daripada ventrikel kanan.", "q": "Hubungan struktur-fungsi yang paling tepat adalah ...", "o": ["Ventrikel kiri memompa darah ke paru yang jaraknya jauh sehingga memerlukan dinding otot lebih tebal", "Ventrikel kanan memompa darah ke aorta sehingga tekanannya lebih rendah karena jaraknya dekat", "Ventrikel kiri memompa darah ke seluruh tubuh melalui sirkulasi sistemik yang tahanannya tinggi sehingga memerlukan dinding otot lebih tebal", "Ventrikel kiri menerima darah kaya CO₂ sehingga perlu berkontraksi lebih kuat", "Ventrikel kanan lebih tipis karena tidak memiliki katup di pintu keluarnya"], "k": 2, "e": "Ventrikel kiri menghadapi tahanan sirkulasi sistemik yang tinggi, sedangkan ventrikel kanan hanya mengalirkan darah ke paru yang tahanannya rendah."}, {"tp": 3, "j": "Numerasi", "c": "C4", "s": "Hasil ekokardiografi seorang pasien: volume akhir diastol (EDV) 120 mL dan volume akhir sistol (ESV) 50 mL. Fraksi ejeksi (EF) = volume sekuncup ÷ EDV × 100%. Nilai EF normal 55–70%.", "q": "Nilai EF dan interpretasinya adalah ...", "o": ["±58%; normal", "±42%; menurun sehingga fungsi pompa melemah", "70%; normal", "±83%; di atas normal", "±29%; sangat menurun"], "k": 0, "e": "Volume sekuncup = 120 − 50 = 70 mL. EF = 70 ÷ 120 × 100% ≈ 58%, berada dalam rentang normal."}, {"tp": 3, "j": "Penalaran", "c": "C5", "s": "Pada blok AV derajat III, impuls listrik dari nodus SA tidak dapat diteruskan melalui nodus AV ke ventrikel. Pasien datang dengan denyut nadi 35 kali/menit, lemas, dan hampir pingsan, sedangkan atrium masih berdenyut ±75 kali/menit.", "q": "Penjelasan yang paling tepat dan penanganannya adalah ...", "o": ["Ventrikel mengambil alih peran nodus SA sehingga denyut meningkat, cukup diobati dengan olahraga", "Atrium berhenti berdenyut sehingga ventrikel berdenyut sangat cepat, perlu obat penurun tekanan darah", "Nodus SA rusak sehingga seluruh jantung berhenti, penanganannya transfusi darah", "Katup semilunar menutup permanen sehingga denyut melambat, diperlukan penggantian katup", "Atrium dan ventrikel berdenyut tidak terkoordinasi; ventrikel dikendalikan pemacu cadangan yang lambat sehingga curah jantung turun, dan diperlukan alat pacu jantung"], "k": 4, "e": "Tanpa hantaran melalui nodus AV, ventrikel berdenyut mengikuti pemacu cadangan yang lambat (30–40 kali/menit). Curah jantung turun sehingga pasien lemas; alat pacu jantung buatan memulihkan irama."}, {"tp": 3, "j": "Literasi", "c": "C4", "s": "Pada EKG, gelombang P menunjukkan depolarisasi atrium, kompleks QRS depolarisasi ventrikel, dan gelombang T repolarisasi ventrikel. Rekaman seorang pasien lanjut usia memperlihatkan gelombang P tidak tampak (diganti getaran halus tidak teratur), sedangkan jarak antar-QRS tidak beraturan.", "q": "Interpretasi dan risiko yang paling tepat adalah ...", "o": ["Aktivitas listrik atrium kacau (fibrilasi atrium) sehingga atrium tidak berkontraksi efektif, darah mudah mengendap, dan risiko bekuan serta stroke meningkat", "Ventrikel tidak mengalami repolarisasi sehingga katup aorta terus terbuka", "Nodus SA bekerja terlalu teratur sehingga ventrikel berdenyut stabil dan risiko menurun", "Atrium berkontraksi lebih kuat dari normal sehingga pengisian ventrikel meningkat dan curah jantung naik", "Ventrikel berhenti berdenyut sehingga terjadi henti jantung segera"], "k": 0, "e": "Hilangnya gelombang P dan irama QRS tidak teratur khas fibrilasi atrium. Darah yang mengendap di atrium dapat membentuk trombus yang terbawa ke otak (stroke)."}, {"tp": 3, "j": "Numerasi", "c": "C4", "s": "Kertas EKG berjalan dengan kecepatan 25 mm/detik. Satu kotak besar = 5 mm (0,2 detik). Pada rekaman seorang siswa, jarak antara dua puncak gelombang R yang berurutan (R–R) adalah 20 mm dan teratur.", "q": "Denyut jantung siswa tersebut adalah ...", "o": ["60 kali/menit", "100 kali/menit", "75 kali/menit", "150 kali/menit", "300 kali/menit"], "k": 2, "e": "Interval R–R = 20 mm ÷ 25 mm/detik = 0,8 detik. Denyut = 60 ÷ 0,8 = 75 kali/menit (atau 300 ÷ 4 kotak besar)."}, {"tp": 3, "j": "Penalaran", "c": "C5", "s": "Seorang pasien hipertensi diberi obat penyekat beta (beta-blocker) yang menghambat reseptor β₁ adrenergik pada jantung.", "q": "Prediksi efek obat tersebut yang paling tepat adalah ...", "o": ["Denyut dan daya kontraksi jantung meningkat sehingga curah jantung naik", "Denyut dan daya kontraksi jantung menurun sehingga curah jantung dan tekanan darah turun", "Pembuluh darah di seluruh tubuh melebar sehingga katup jantung terbuka terus", "Aktivitas saraf parasimpatik terhenti sehingga denyut jantung stabil di 150 kali/menit", "Volume darah bertambah sehingga tekanan darah turun"], "k": 1, "e": "Reseptor β₁ di jantung dirangsang oleh adrenalin/noradrenalin untuk menaikkan denyut dan kontraktilitas. Penyekatnya menurunkan keduanya sehingga curah jantung dan tekanan darah turun."}, {"tp": 4, "j": "Numerasi", "c": "C4", "s": "Luas penampang aorta ±3 cm², sedangkan jumlah luas penampang seluruh kapiler ±4.500 cm². Kecepatan aliran darah di aorta ±30 cm/detik. Debit darah di seluruh sistem dianggap sama (A₁v₁ = A₂v₂).", "q": "Kecepatan aliran darah di kapiler dan manfaatnya adalah ...", "o": ["0,2 cm/detik; lambat sehingga darah lebih cepat kembali ke jantung", "2 cm/detik; cepat sehingga eritrosit tidak sempat menggumpal", "450 cm/detik; cepat sehingga tekanan di kapiler tinggi", "0,02 cm/detik; lambat sehingga pertukaran zat dan gas berlangsung efisien", "1.500 cm/detik; cepat sehingga O₂ segera sampai ke sel"], "k": 3, "e": "v kapiler = (3 × 30) ÷ 4.500 = 0,02 cm/detik. Aliran yang sangat lambat memberi waktu cukup bagi difusi O₂, CO₂, dan nutrien."}, {"tp": 4, "j": "Penalaran", "c": "C4", "s": "Tiga pembuluh darah diamati:\n|Pembuluh|Ciri|\n|X|Dinding tebal dan elastis, tanpa katup, denyutnya dapat diraba|\n|Y|Dinding tipis, lumen lebar, memiliki katup|\n|Z|Dinding hanya satu lapis sel endotel|", "q": "Pernyataan yang tepat tentang pembuluh Y dan hubungannya dengan aliran darah adalah ...", "o": ["Y adalah arteri; katupnya menjaga tekanan tinggi dari jantung", "Y adalah kapiler; katupnya mengatur pertukaran gas dengan sel", "Y adalah arteri; lumen lebar menurunkan tekanan agar darah mengalir cepat", "Y adalah vena; katupnya mencegah aliran balik karena tekanan rendah, dibantu kontraksi otot rangka", "Y adalah vena; katupnya mempercepat aliran darah ke seluruh tubuh dengan tekanan tinggi"], "k": 3, "e": "Dinding tipis, lumen lebar, dan katup adalah ciri vena. Tekanan di vena rendah sehingga katup dan pompa otot rangka mencegah darah mengalir balik."}, {"tp": 4, "j": "Literasi", "c": "C5", "s": "Seorang satpam bekerja berdiri 10 jam per hari. Pada sore hari kakinya bengkak dan tampak pembuluh vena menonjol berkelok (varises) di betis.", "q": "Saran yang paling tepat berdasarkan fisiologi aliran balik vena adalah ...", "o": ["Mengurangi minum air putih agar volume darah menurun dan tekanan vena turun", "Memakai sepatu bertumit tinggi agar tekanan hidrostatik di betis meningkat", "Sering menggerakkan betis, menjinjitkan kaki, dan meninggikan tungkai saat istirahat agar pompa otot rangka membantu aliran balik vena", "Berdiri tanpa bergerak agar katup vena dapat beristirahat", "Mengonsumsi lebih banyak garam agar tekanan arteri naik dan mendorong darah ke atas"], "k": 2, "e": "Berdiri lama menumpuk darah di vena tungkai akibat gravitasi. Kontraksi otot betis dan posisi tungkai lebih tinggi membantu mengembalikan darah ke jantung."}, {"tp": 4, "j": "Numerasi", "c": "C4", "s": "Tekanan darah seorang pasien 150/90 mmHg. Tekanan nadi = sistol − diastol. Tekanan arteri rata-rata (MAP) ≈ diastol + ⅓ × tekanan nadi.", "q": "Tekanan nadi dan MAP pasien tersebut adalah ...", "o": ["60 mmHg dan 120 mmHg", "60 mmHg dan 110 mmHg", "120 mmHg dan 110 mmHg", "60 mmHg dan 130 mmHg", "90 mmHg dan 100 mmHg"], "k": 1, "e": "Tekanan nadi = 150 − 90 = 60 mmHg. MAP = 90 + ⅓ × 60 = 90 + 20 = 110 mmHg."}, {"tp": 4, "j": "Penalaran", "c": "C5", "s": "Seorang bayi lahir dengan defek septum ventrikel (lubang pada sekat antar-ventrikel). Tekanan ventrikel kiri jauh lebih tinggi daripada ventrikel kanan.", "q": "Dampak yang paling mungkin pada peredaran darah bayi tersebut adalah ...", "o": ["Sebagian darah miskin O₂ dari ventrikel kanan mengalir ke ventrikel kiri sehingga seluruh tubuh bayi biru sejak lahir", "Aliran darah ke paru berhenti sehingga vena pulmonalis kosong", "Darah dari atrium kanan langsung masuk aorta tanpa melewati ventrikel", "Tekanan ventrikel kiri turun menjadi 25 mmHg sehingga aorta kolaps", "Sebagian darah kaya O₂ dari ventrikel kiri mengalir ke ventrikel kanan sehingga volume darah ke paru bertambah dan jantung bekerja lebih berat"], "k": 4, "e": "Darah mengalir dari tekanan tinggi (ventrikel kiri) ke tekanan rendah (ventrikel kanan), sehingga aliran ke paru berlebih dan jantung bekerja lebih berat (pirau kiri ke kanan)."}, {"tp": 4, "j": "Numerasi", "c": "C5", "s": "Menurut hukum Poiseuille, resistensi pembuluh berbanding terbalik dengan pangkat empat jari-jarinya (R ∝ 1/r⁴). Pada pasien hipertensi, jari-jari arteriol menyempit menjadi setengah dari semula (panjang pembuluh dan kekentalan darah tetap).", "q": "Resistensi arteriol tersebut menjadi ... dan dampaknya terhadap tekanan darah adalah ...", "o": ["8 kali lebih besar sehingga tekanan darah meningkat", "16 kali lebih besar sehingga tekanan darah meningkat", "4 kali lebih besar sehingga tekanan darah meningkat", "16 kali lebih kecil sehingga tekanan darah menurun", "2 kali lebih besar sehingga tekanan darah tidak berubah"], "k": 1, "e": "Jika r menjadi ½, maka R ∝ 1/(½)⁴ = 16. Resistensi perifer naik 16 kali sehingga tekanan darah meningkat bila curah jantung tetap."}, {"tp": 4, "j": "Penalaran", "c": "C5", "s": "Tablet nitrogliserin untuk meredakan nyeri dada (angina) diletakkan di bawah lidah, bukan ditelan. Darah dari saluran cerna mengalir ke hati melalui vena porta hepatika sebelum masuk sirkulasi sistemik, dan hati menguraikan banyak obat (efek lintas pertama).", "q": "Alasan pemberian di bawah lidah yang paling tepat adalah ...", "o": ["Obat diserap lewat pembuluh limfe usus sehingga bekerja lambat tetapi tahan lama", "Obat melewati vena porta hepatika sehingga dosis rendah sudah cukup", "Obat diserap kapiler mukosa mulut dan langsung masuk sirkulasi sistemik tanpa melewati hati sehingga bekerja cepat dan tidak banyak terurai", "Obat masuk ke arteri pulmonalis sehingga langsung bekerja di paru", "Obat tidak perlu diserap sehingga langsung bekerja di jantung"], "k": 2, "e": "Mukosa di bawah lidah kaya kapiler. Obat masuk ke vena, jantung, lalu sirkulasi sistemik tanpa melewati vena porta dan hati sehingga tidak banyak terurai."}, {"tp": 4, "j": "Numerasi", "c": "C4", "s": "Curah jantung seorang dewasa saat istirahat ±5 L/menit. Sekitar 20% di antaranya mengalir ke kedua ginjal.", "q": "Volume darah yang melewati ginjal dalam 24 jam adalah ...", "o": ["7.200 liter", "144 liter", "300 liter", "1.200 liter", "1.440 liter"], "k": 4, "e": "Aliran ginjal = 20% × 5 = 1 L/menit. Dalam 24 jam (1.440 menit) = 1 × 1.440 = 1.440 liter."}, {"tp": 4, "j": "Penalaran", "c": "C5", "s": "Pertukaran cairan di kapiler dipengaruhi tekanan hidrostatik (mendorong cairan keluar) dan tekanan osmotik koloid (menarik cairan masuk).\n|Lokasi|Tekanan hidrostatik|Tekanan osmotik koloid normal|\n|Ujung arteriol|35 mmHg|25 mmHg|\n|Ujung venula|15 mmHg|25 mmHg|\nPada pasien malnutrisi berat, kadar albumin plasma turun sehingga tekanan osmotik koloid menjadi 15 mmHg.", "q": "Tekanan netto di ujung venula pasien dan akibatnya adalah ...", "o": ["0 mmHg; reabsorpsi cairan ke kapiler terhenti sehingga cairan tertahan di jaringan (edema)", "−10 mmHg; reabsorpsi meningkat sehingga jaringan menjadi kering", "+10 mmHg; filtrasi meningkat sehingga volume darah naik", "+30 mmHg; cairan keluar sangat deras sehingga kapiler pecah", "0 mmHg; pertukaran seimbang sehingga tidak terjadi gangguan"], "k": 0, "e": "Tekanan netto = hidrostatik − osmotik koloid = 15 − 15 = 0 mmHg (normalnya 15 − 25 = −10 mmHg, yaitu reabsorpsi). Tanpa reabsorpsi, cairan tertahan di jaringan sehingga timbul edema."}, {"tp": 4, "j": "Literasi", "c": "C4", "s": "Pada filariasis (kaki gajah), cacing filaria dewasa menyumbat pembuluh limfe di tungkai. Tungkai penderita membengkak keras dan membesar.", "q": "Hubungan penyumbatan tersebut dengan pembengkakan adalah ...", "o": ["Darah dalam arteri tungkai tidak dapat keluar dari kapiler sehingga jaringan kekurangan O₂ dan mengempis", "Eritrosit menumpuk di vena sehingga tekanan osmotik plasma turun", "Katup vena rusak sehingga darah mengalir balik ke arteri", "Cairan limfe yang seharusnya dikembalikan ke vena tertahan di jaringan sehingga terjadi penumpukan cairan (limfedema)", "Pembuluh limfe memproduksi terlalu banyak limfosit yang menyumbat kapiler"], "k": 3, "e": "Sistem limfe mengembalikan cairan jaringan ke vena. Bila pembuluh limfe tersumbat, cairan menumpuk di jaringan sehingga tungkai membengkak (limfedema)."}, {"tp": 5, "j": "Numerasi", "c": "C5", "s": "Profil lipid seorang laki-laki 52 tahun, perokok:\n|Parameter|Hasil|Target|\n|Kolesterol total|260 mg/dL|\u003c 200|\n|HDL|35 mg/dL|> 40|\n|Trigliserida|175 mg/dL|\u003c 150|\nRumus Friedewald: LDL = kolesterol total − HDL − (trigliserida ÷ 5). Target LDL \u003c 130 mg/dL.", "q": "Nilai LDL dan interpretasinya adalah ...", "o": ["225 mg/dL; jauh di atas target sehingga risiko aterosklerosis tinggi", "190 mg/dL; di bawah target karena HDL rendah menurunkan risiko", "50 mg/dL; jauh di bawah target sehingga risiko rendah", "35 mg/dL; rendah sehingga pasien aman", "190 mg/dL; jauh di atas target sehingga risiko aterosklerosis tinggi"], "k": 4, "e": "LDL = 260 − 35 − (175 ÷ 5) = 260 − 35 − 35 = 190 mg/dL. Nilai ini jauh di atas target; ditambah HDL rendah dan merokok, risiko aterosklerosis tinggi."}, {"tp": 5, "j": "Penalaran", "c": "C4", "s": "Seorang pria 58 tahun dengan aterosklerosis koroner tiba-tiba merasakan nyeri dada hebat lebih dari 30 menit. EKG dan pemeriksaan enzim jantung menunjukkan kerusakan otot jantung (infark miokard).", "q": "Rangkaian kejadian yang paling tepat menjelaskan kondisi tersebut adalah ...", "o": ["Vena koroner menyempit → darah vena menumpuk di jantung → eritrosit pecah → otot jantung membengkak", "Plak pada arteri koroner pecah → trombosit menggumpal membentuk trombus → aliran darah ke otot jantung terhenti → sel otot jantung kekurangan O₂ dan mati", "Katup aorta menutup permanen → darah tidak mengalir ke arteri koroner → atrium kiri berkontraksi lebih kuat", "Plak pecah → leukosit memakan plak → aliran koroner meningkat → otot jantung kelebihan O₂", "Kadar HDL meningkat → plak larut → serpihan plak menyumbat vena pulmonalis"], "k": 1, "e": "Pecahnya plak mengaktifkan trombosit dan pembekuan; trombus menyumbat arteri koroner sehingga otot jantung iskemia lalu nekrosis (infark miokard)."}, {"tp": 5, "j": "Literasi", "c": "C4", "s": "Sebuah penelitian menemukan bahwa penduduk yang rata-rata mengonsumsi garam lebih dari 10 g/hari memiliki prevalensi hipertensi lebih tinggi daripada yang mengonsumsi kurang dari 5 g/hari. Pedoman gizi menganjurkan batas natrium 2.000 mg/hari (setara ±5 g garam).", "q": "Mekanisme fisiologis yang paling masuk akal menjelaskan hubungan tersebut adalah ...", "o": ["Kelebihan natrium meningkatkan osmolaritas plasma sehingga air tertahan, volume darah dan curah jantung naik, lalu tekanan darah meningkat", "Kelebihan natrium menurunkan osmolaritas plasma sehingga air keluar dari pembuluh dan tekanan darah turun", "Natrium melebarkan arteriol sehingga resistensi perifer turun tetapi denyut jantung melambat", "Natrium meningkatkan jumlah trombosit sehingga darah lebih kental dan jantung berdenyut lambat", "Natrium menghambat pembentukan angiotensin sehingga ginjal menahan lebih banyak kalium"], "k": 0, "e": "Natrium berlebih menahan air, menaikkan volume plasma dan curah jantung, sehingga tekanan darah naik. Karena itu pembatasan garam termasuk upaya pencegahan hipertensi."}, {"tp": 5, "j": "Numerasi", "c": "C4", "s": "Tiga kali pengukuran tekanan darah pada kunjungan berbeda seorang pasien: 142/92, 138/88, dan 146/94 mmHg. Kriteria hipertensi: rata-rata sistol ≥ 140 dan/atau rata-rata diastol ≥ 90 mmHg.", "q": "Rata-rata tekanan darah dan kesimpulannya adalah ...", "o": ["142/91 mmHg; belum memenuhi kriteria hipertensi", "138/88 mmHg; belum memenuhi kriteria hipertensi", "146/94 mmHg; memenuhi kriteria hipertensi berat", "426/274 mmHg; hipertensi sangat berat", "142/91 mmHg; memenuhi kriteria hipertensi"], "k": 4, "e": "Sistol = (142 + 138 + 146) ÷ 3 = 142 mmHg; diastol = (92 + 88 + 94) ÷ 3 ≈ 91 mmHg. Keduanya mencapai batas kriteria hipertensi."}, {"tp": 5, "j": "Penalaran", "c": "C4", "s": "Seorang remaja putri tampak pucat dan lesu. Hasil lab: Hb 9 g/dL (normal 12–16), MCV 68 fL (normal 80–100 fL; eritrosit berukuran kecil). Asupan makanannya rendah daging dan sayur hijau, dan ia mengalami menstruasi yang banyak.", "q": "Penyebab dan solusi yang paling tepat adalah ...", "o": ["Kekurangan vitamin K sehingga eritrosit tidak membeku; diberi suplemen vitamin K", "Kelebihan eritropoietin sehingga eritrosit membesar; diberi obat penekan sumsum tulang", "Kekurangan zat besi sehingga sintesis heme dan hemoglobin terganggu; diberi tablet tambah darah (zat besi) bersama vitamin C", "Kerusakan sumsum tulang akibat sel leukemia; perlu transfusi trombosit", "Mutasi gen globin sehingga eritrosit berbentuk sabit; perlu menghindari aktivitas fisik"], "k": 2, "e": "Eritrosit kecil dan pucat (mikrositik) serta riwayat kehilangan darah dan asupan rendah zat besi menunjukkan anemia defisiensi besi. Vitamin C membantu penyerapan zat besi."}, {"tp": 5, "j": "Literasi", "c": "C5", "s": "Seorang anak didiagnosis leukemia limfoblastik akut. Hitung leukosit 150.000/µL (normal 4.000–10.000), tetapi ia sering terkena infeksi. Hb 7 g/dL dan trombosit 30.000/µL.", "q": "Penjelasan yang paling tepat untuk temuan tersebut adalah ...", "o": ["Leukosit yang sangat banyak memfagosit semua kuman sehingga infeksi seharusnya jarang terjadi", "Sel leukosit ganas yang belum matang memenuhi sumsum tulang sehingga leukosit tidak berfungsi baik dan produksi eritrosit serta trombosit tertekan", "Leukosit yang tinggi mengambil alih fungsi eritrosit sehingga Hb turun", "Trombosit rendah menyebabkan sumsum tulang membentuk leukosit berlebihan", "Leukosit berlebih menghasilkan banyak antibodi sehingga eritrosit hancur dan infeksi mudah menyebar"], "k": 1, "e": "Pada leukemia, sel darah putih ganas yang imatur berproliferasi dan mendesak sel normal di sumsum tulang. Akibatnya imun lemah (infeksi), anemia, dan trombositopenia (perdarahan)."}, {"tp": 5, "j": "Numerasi", "c": "C4", "s": "Di sebuah kecamatan terdapat 1.200 penduduk dewasa. Hasil skrining menemukan 30% menderita hipertensi. Dari penderita hipertensi tersebut, 40% tekanan darahnya terkontrol dengan obat.", "q": "Banyak penderita hipertensi yang belum terkontrol adalah ...", "o": ["144 orang", "360 orang", "480 orang", "216 orang", "72 orang"], "k": 3, "e": "Penderita hipertensi = 30% × 1.200 = 360 orang. Belum terkontrol = 60% × 360 = 216 orang."}, {"tp": 5, "j": "Penalaran", "c": "C5", "s": "Seorang pasien mengalami penyempitan 90% pada arteri koroner kiri depan. Dokter memasang ring (stent) melalui kateter (angioplasti) pada pasien A, sedangkan pasien B dengan penyempitan di tiga pembuluh dioperasi bypass (CABG) memakai pembuluh dari tungkai.", "q": "Perbandingan cara kerja kedua tindakan yang paling tepat adalah ...", "o": ["Stent melarutkan plak dengan listrik, sedangkan bypass mengganti seluruh jantung dengan jantung donor", "Stent menggantikan katup jantung yang rusak, sedangkan bypass menambah jumlah ventrikel", "Stent menahan dinding arteri agar lumen tetap terbuka, sedangkan bypass membuat jalur baru yang melewati bagian yang menyempit", "Stent dan bypass sama-sama menurunkan kadar kolesterol dalam darah dengan menyerap LDL", "Stent memperlambat denyut jantung, sedangkan bypass mempercepat aliran vena ke atrium kanan"], "k": 2, "e": "Stent adalah rangka kecil penahan dinding arteri; bypass (CABG) menyambungkan pembuluh cangkok di sekitar penyempitan sehingga darah mengalir melalui jalur baru."}, {"tp": 5, "j": "Literasi", "c": "C5", "s": "Karbon monoksida (CO) dalam asap rokok berikatan dengan hemoglobin membentuk karboksihemoglobin, dengan afinitas ±200 kali lebih besar daripada O₂. Seorang perokok berat berusia 40 tahun memiliki Hb 18 g/dL dan hematokrit 54%, serta sering mengalami tekanan darah tinggi.", "q": "Analisis yang paling tepat tentang risiko kesehatan perokok tersebut adalah ...", "o": ["Karboksihemoglobin mengurangi pengangkutan O₂ sehingga ginjal meningkatkan eritropoietin; eritrosit dan hematokrit naik, darah mengental, dan risiko trombus serta aterosklerosis meningkat", "CO meningkatkan pengikatan O₂ sehingga jaringan kelebihan O₂ dan eritrosit berkurang, risiko penyakit jantung turun", "CO menghancurkan trombosit sehingga darah sulit membeku dan perokok cenderung bertekanan darah rendah", "Hb yang tinggi menandakan perokok tersebut sehat karena kapasitas angkut O₂ meningkat", "Nikotin melebarkan seluruh pembuluh darah sehingga tekanan darah turun dan jantung bekerja lebih ringan"], "k": 0, "e": "CO menempati hemoglobin sehingga O₂ yang terangkut berkurang (hipoksia). Tubuh menaikkan EPO dan eritrosit (polisitemia reaktif), darah mengental, dan bersama kerusakan endotel serta vasokonstriksi nikotin, risiko trombus dan hipertensi naik."}, {"tp": 5, "j": "Numerasi", "c": "C5", "s": "Program latihan aerobik 8 minggu pada seorang karyawan. Curah jantung istirahat tetap 4,8 L/menit.\n|Parameter|Sebelum|Sesudah|\n|Denyut jantung istirahat|80 kali/menit|65 kali/menit|\n|Volume sekuncup|60 mL|?|", "q": "Volume sekuncup sesudah latihan dan evaluasi terhadap program tersebut adalah ...", "o": ["±74 mL; jantung melemah sehingga harus berdenyut lebih cepat", "±60 mL; tidak ada perubahan sehingga program tidak berpengaruh", "±52 mL; jantung lebih efisien karena volume sekuncup turun", "±74 mL; jantung menjadi lebih efisien karena memompa lebih banyak darah tiap denyut sehingga denyut istirahat lebih rendah", "±120 mL; jantung membesar patologis sehingga program berbahaya"], "k": 3, "e": "Volume sekuncup sesudah = 4.800 mL ÷ 65 ≈ 74 mL (sebelum: 4.800 ÷ 80 = 60 mL). Volume sekuncup naik dan denyut turun, tanda adaptasi jantung atlet yang efisien."}];
+var L = ['A', 'B', 'C', 'D', 'E'];
+var N = BANK.length;
+var KKM = 75;
+var DURASI = 90 * 60;
+var LS = 'bio11-sirkulasi-v1';
+var TPS = {
+  1: 'Menganalisis komponen darah dan fungsinya',
+  2: 'Menganalisis golongan darah, transfusi, dan pembekuan darah',
+  3: 'Menganalisis struktur jantung dan siklus jantung',
+  4: 'Menganalisis pembuluh darah dan mekanisme peredaran darah',
+  5: 'Mengevaluasi gangguan, pencegahan, dan teknologi sistem peredaran darah'
+};
+var JENIS = ['Literasi', 'Numerasi', 'Penalaran'];
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var app = $('#app');
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+var S = {
+  view: 'start', nama: '', kelas: '', ans: new Array(N).fill(-1), flag: new Array(N).fill(false), idx: 0,
+  t0: 0, deadline: 0, started: false,
+  teacher: false, uid: null, canWrite: null, db: null, ready: false,
+  stored: null, status: 'idle', finalAns: null, finalSec: 0, finalAt: null, err: '',
+  rows: [], rowsLoaded: false, rowsErr: null, rowsSlow: false, sub: null, openRow: null, delAsk: null,
+  q: '', kf: 'all', ksel: '', kfilter: 'all', formErr: ''
+};
+var timer = null;
+
+/* ---------- util ---------- */
+function ansStr(a) { return a.map(function (x) { return x < 0 ? '-' : L[x]; }).join(''); }
+function parseAns(s) { var out = []; for (var i = 0; i < N; i++) { out.push(L.indexOf((s || '')[i])); } return out; }
+function fmtTime(sec) { var m = Math.floor(sec / 60), s = sec % 60; return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; }
+function fmtDur(sec) { var m = Math.floor(sec / 60), s = sec % 60; return m + ' mnt ' + s + ' dtk'; }
+function fmtDate(iso) { try { return new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return iso || ''; } }
+function score(ans) {
+  var b = 0, tp = {}, jn = {};
+  for (var i = 0; i < N; i++) {
+    var q = BANK[i], ok = ans[i] === q.k;
+    tp[q.tp] = tp[q.tp] || { b: 0, n: 0 }; jn[q.j] = jn[q.j] || { b: 0, n: 0 };
+    tp[q.tp].n++; jn[q.j].n++;
+    if (ok) { b++; tp[q.tp].b++; jn[q.j].b++; }
+  }
+  var kosong = ans.filter(function (x) { return x < 0; }).length;
+  return { b: b, salah: N - b - kosong, kosong: kosong, nilai: Math.round(b * 100 / N), tp: tp, jn: jn };
+}
+function toast(msg) { var t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(function () { t.classList.remove('on'); }, 2200); }
+function reduced() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+
+/* ---------- persistence ---------- */
+function persist() { try { localStorage.setItem(LS, JSON.stringify({ nama: S.nama, kelas: S.kelas, ans: S.ans, flag: S.flag, idx: S.idx, t0: S.t0, deadline: S.deadline, started: S.started })); } catch (e) {} }
+function restore() {
+  try {
+    var j = JSON.parse(localStorage.getItem(LS) || 'null');
+    if (j && j.started && Array.isArray(j.ans) && j.ans.length === N) {
+      S.nama = j.nama || ''; S.kelas = j.kelas || ''; S.ans = j.ans; S.flag = Array.isArray(j.flag) && j.flag.length === N ? j.flag : S.flag;
+      S.idx = Math.min(N - 1, Math.max(0, j.idx || 0)); S.t0 = j.t0; S.deadline = j.deadline; S.started = true; return true;
+    }
+  } catch (e) {}
+  return false;
+}
+function clearProgress() { try { localStorage.removeItem(LS); } catch (e) {} }
+
+/* ---------- pieces ---------- */
+var ECG = '<svg class="ecg" viewBox="0 0 44 28" aria-hidden="true"><path d="M1 15 H12 L16 5 L22 24 L27 11 L30 15 H43"/></svg>';
+function renderStim(txt) {
+  if (!txt) return '';
+  var lines = txt.split('\n'), out = '', tbl = [];
+  function flush() {
+    if (!tbl.length) return;
+    var h = '<div class="scroll"><table>';
+    tbl.forEach(function (r, ri) {
+      var cells = r.slice(1).split('|');
+      h += '<tr>' + cells.map(function (c) { return (ri === 0 ? '<th>' : '<td>') + esc(c) + (ri === 0 ? '</th>' : '</td>'); }).join('') + '</tr>';
+    });
+    out += h + '</table></div>'; tbl = [];
+  }
+  lines.forEach(function (ln) { if (ln.charAt(0) === '|') { tbl.push(ln); } else { flush(); out += '<p>' + esc(ln) + '</p>'; } });
+  flush();
+  return out;
+}
+function barHtml(label, b, n) {
+  var p = Math.round(b * 100 / n), cls = p >= 75 ? 'hi' : (p < 50 ? 'lo' : '');
+  return '<div class="bar2"><span>' + label + '</span><b>' + b + '/' + n + ' · ' + p + '%</b><div class="t"><i class="' + cls + '" data-w="' + p + '"></i></div></div>';
+}
+
+/* ---------- views ---------- */
+function tabList() {
+  if (S.teacher) return [['start', 'Kuis'], ['key', 'Lembar kunci'], ['dash', 'Hasil murid']];
+  if (S.finalAns) return [['result', 'Hasil saya'], ['key', 'Lembar kunci']];
+  return [];
+}
+function activeTab() { if (S.view === 'quiz') return 'start'; return S.view; }
+function head() {
+  var tabs = tabList(), act = activeTab();
+  var nav = tabs.length ? '<nav class="tabs" aria-label="Menu">' + tabs.map(function (t) { return '<button type="button" data-act="tab" data-v="' + t[0] + '"' + (t[0] === act ? ' aria-current="page"' : '') + '>' + t[1] + '</button>'; }).join('') + '</nav>' : '';
+  var who = S.view === 'quiz' ? '<div class="who" title="Nama murid dan kelas"><span>' + esc(S.nama) + '</span><i></i><span>' + esc(S.kelas) + '</span></div><div class="clock" id="clock" role="timer" aria-label="Sisa waktu">--:--</div>' : '';
+  return '<header class="top"><div class="in bar"><div class="brand">' + ECG + '<div><b>Sirkulasi Darah</b><small>Biologi XI · Kurikulum Merdeka</small></div></div>' + nav + who + '</div>' + (S.view === 'quiz' ? '<div class="prog"><i id="pbar"></i></div>' : '') + '</header>';
+}
+
+function vStart() {
+  var cnt = {}, jc = {};
+  BANK.forEach(function (q) { cnt[q.tp] = (cnt[q.tp] || 0) + 1; jc[q.j] = (jc[q.j] || 0) + 1; });
+  var tp = Object.keys(TPS).map(function (k) { return '<li><b class="tpc">TP ' + k + '</b><span>' + TPS[k] + '</span><small>' + cnt[k] + ' soal</small></li>'; }).join('');
+  var warn = '';
+  if (S.ready && !S.teacher) {
+    if (!S.db || !S.uid) warn = '<div class="note warn">Halaman ini belum terhubung ke akun guru, jadi hasil tidak terkirim otomatis. Setelah selesai, Anda dapat menyalin hasil dan mengirimkannya ke guru.</div>';
+    else if (S.canWrite === false) warn = '<div class="note warn">Akun Anda berstatus hanya-lihat, sehingga hasil belum dapat dikirim ke guru. Mintalah guru mengubah akses Anda menjadi Kontributor sebelum mulai.</div>';
+  }
+  if (S.teacher) warn = '<div class="note">Mode guru: Anda sedang melihat pratinjau kuis. Hasil pengerjaan di mode ini tidak disimpan. Buka tab <b>Hasil murid</b> untuk melihat kumpulan jawaban murid.</div>';
+  return '<main class="in page">' +
+    '<section class="hero"><span class="eyebrow">Biologi · Fase F · Kelas XI</span><h1>Kuis Sirkulasi Darah</h1>' +
+    '<p>' + N + ' soal pilihan ganda lima opsi yang menuntut analisis, penalaran, serta pembacaan data dan angka dari kasus nyata.</p>' +
+    '<div class="facts"><span class="chip ven">' + N + ' soal</span><span class="chip ven">5 pilihan (A–E)</span><span class="chip ven">90 menit</span><span class="chip ven">KKM ' + KKM + '</span><span class="chip ven">Literasi ' + (jc.Literasi || 0) + ' · Numerasi ' + (jc.Numerasi || 0) + ' · Penalaran ' + (jc.Penalaran || 0) + '</span></div></section>' +
+    warn +
+    '<div class="split"><section class="card idcard"><h2>Identitas murid</h2>' +
+    '<div class="field"><label for="nama">Nama lengkap</label><input id="nama" autocomplete="name" maxlength="80" placeholder="Contoh: Siti Aisyah" value="' + esc(S.nama) + '"></div>' +
+    '<div class="field"><label for="kelas">Kelas</label><input id="kelas" maxlength="30" placeholder="Contoh: XI MIPA 2" value="' + esc(S.kelas) + '"></div>' +
+    '<p class="err" id="ferr" role="alert">' + esc(S.formErr) + '</p>' +
+    '<button type="button" class="btn art" data-act="start" style="width:100%">Mulai mengerjakan</button></section>' +
+    '<section class="card"><h2>Tujuan pembelajaran yang diukur</h2><ul class="tplist">' + tp + '</ul></section></div>' +
+    '<section class="card"><h2>Cara mengerjakan</h2><ol class="how"><li>Pilih satu jawaban per soal. Jawaban dapat diganti selama waktu masih ada.</li><li>Tandai soal yang masih ragu, lalu kembali lewat daftar soal.</li><li>Pintasan papan ketik: tombol A–E (atau 1–5) memilih jawaban, panah kiri dan kanan berpindah soal.</li><li>Jawaban tersimpan otomatis di perangkat ini. Saat dikumpulkan, hasil dikirim ke akun guru.</li><li>Lembar kunci jawaban dan pembahasan terbuka setelah Anda mengumpulkan.</li></ol></section>' +
+    '</main>';
+}
+
+function qHtml() {
+  var i = S.idx, q = BANK[i];
+  var opts = q.o.map(function (t, k) { return '<button type="button" class="opt" role="radio" aria-checked="' + (S.ans[i] === k) + '" data-act="pick" data-k="' + k + '"><span class="lt">' + L[k] + '</span><span>' + esc(t) + '</span></button>'; }).join('');
+  var last = i === N - 1;
+  return '<article class="qcard" aria-live="polite"><div class="qhead"><span class="qno">Soal ' + (i + 1) + '<small>/' + N + '</small></span><span class="chip ven">TP ' + q.tp + '</span><span class="chip">' + q.j + '</span><span class="chip">' + q.c + '</span>' + (S.flag[i] ? '<span class="chip warn">Ragu-ragu</span>' : '') + '</div>' +
+    '<div class="stim">' + renderStim(q.s) + '</div><p class="qtext">' + esc(q.q) + '</p>' +
+    '<div class="opts" role="radiogroup" aria-label="Pilihan jawaban">' + opts + '</div>' +
+    '<div class="qnav"><button type="button" class="btn" data-act="prev"' + (i === 0 ? ' disabled' : '') + '>← Sebelumnya</button>' +
+    '<button type="button" class="btn ghost" data-act="flag">' + (S.flag[i] ? 'Hapus tanda ragu' : 'Tandai ragu') + '</button>' +
+    (S.ans[i] >= 0 ? '<button type="button" class="btn ghost" data-act="clear">Kosongkan</button>' : '') +
+    '<span class="sp"></span>' +
+    (last ? '<button type="button" class="btn art" data-act="submit">Kumpulkan</button>' : '<button type="button" class="btn ven" data-act="next">Berikutnya →</button>') + '</div>' +
+    '<p class="hint">Pintasan: A–E memilih jawaban · ← → berpindah soal</p></article>';
+}
+function palHtml() {
+  var done = S.ans.filter(function (x) { return x >= 0; }).length, fl = S.flag.filter(Boolean).length;
+  var g = BANK.map(function (_, i) {
+    var c = 'pn' + (S.ans[i] >= 0 ? ' done' : '') + (S.flag[i] ? ' fl' : '') + (i === S.idx ? ' cur' : '');
+    return '<button type="button" class="' + c + '" data-act="go" data-i="' + i + '" aria-label="Soal ' + (i + 1) + (S.ans[i] >= 0 ? ', terjawab' : ', belum dijawab') + (S.flag[i] ? ', ragu' : '') + '"' + (i === S.idx ? ' aria-current="true"' : '') + '>' + (i + 1) + '</button>';
+  }).join('');
+  return '<aside class="pal"><h3>Daftar soal</h3><div class="pgrid">' + g + '</div>' +
+    '<ul class="legend"><li><i class="a"></i>Terjawab</li><li><i class="b"></i>Ragu</li><li><i class="c"></i>Sedang dibuka</li></ul>' +
+    '<p class="hint"><b class="mono">' + done + '</b> dari ' + N + ' terjawab · <b class="mono">' + fl + '</b> ragu</p>' +
+    '<button type="button" class="btn art" data-act="submit">Kumpulkan jawaban</button></aside>';
+}
+function vQuiz() {
+  return '<main class="in"><div class="quiz">' + (S.teacher ? '' : '') + '<div id="qmain">' + qHtml() + '</div><div id="pal">' + palHtml() + '</div></div></main>';
+}
+function refreshQuiz() {
+  var qm = $('#qmain'), pl = $('#pal');
+  if (!qm || !pl) { render(); return; }
+  qm.innerHTML = qHtml(); pl.innerHTML = palHtml(); updateProg(); persist();
+}
+function updateProg() { var p = $('#pbar'); if (p) p.style.width = (S.ans.filter(function (x) { return x >= 0; }).length * 100 / N) + '%'; }
+
+function statusNote() {
+  var s = S.status;
+  if (s === 'saving') return '<div class="note">Mengirim hasil ke akun guru…</div>';
+  if (s === 'saved') return '<div class="note ok">Hasil Anda sudah tersimpan di akun guru' + (S.stored && S.stored.dikirim ? ' (' + esc(fmtDate(S.stored.dikirim)) + ')' : '') + '. Anda tidak perlu mengirim ulang.</div>';
+  if (s === 'prev') return '<div class="note">Anda sudah mengumpulkan kuis ini' + (S.stored && S.stored.dikirim ? ' pada ' + esc(fmtDate(S.stored.dikirim)) : '') + '. Hasil di bawah ini yang tercatat di akun guru.</div>';
+  if (s === 'preview') return '<div class="note">Pratinjau guru: hasil di mode ini tidak disimpan.</div>';
+  if (s === 'readonly') return '<div class="note warn">Akun Anda berstatus hanya-lihat sehingga hasil belum dapat dikirim ke guru. Mintalah guru mengubah akses Anda menjadi Kontributor, lalu coba kirim lagi.<br><button type="button" class="btn" data-act="retry">Kirim ulang</button> <button type="button" class="btn" data-act="copy">Salin hasil</button></div>';
+  if (s === 'error') return '<div class="note bad">Hasil belum tersimpan di akun guru. Periksa sambungan internet lalu coba lagi.<br><button type="button" class="btn" data-act="retry">Kirim ulang</button> <button type="button" class="btn" data-act="copy">Salin hasil</button></div>';
+  if (s === 'local') return '<div class="note warn">Halaman ini belum terhubung ke akun guru, jadi hasil tidak terkirim otomatis. Salin hasil di bawah dan kirimkan kepada guru.<br><button type="button" class="btn" data-act="copy">Salin hasil</button></div>';
+  return '';
+}
+function vResult() {
+  var a = S.finalAns, sc = score(a), pass = sc.nilai >= KKM, C = 2 * Math.PI * 78;
+  var tp = Object.keys(TPS).map(function (k) { return barHtml('<b>TP ' + k + '</b> · ' + TPS[k], sc.tp[k].b, sc.tp[k].n); }).join('');
+  var jn = JENIS.map(function (j) { return sc.jn[j] ? barHtml(j, sc.jn[j].b, sc.jn[j].n) : ''; }).join('');
+  var burst = '';
+  if (pass && !reduced()) { for (var i = 0; i < 16; i++) burst += '<i style="left:' + (4 + i * 6) + '%;animation-delay:' + ((i % 6) * 0.15) + 's"></i>'; }
+  var dl = '<div class="dl"><span>Benar</span><b>' + sc.b + '</b><span>Salah</span><b>' + sc.salah + '</b><span>Kosong</span><b>' + sc.kosong + '</b><span>Waktu</span><b>' + fmtDur(S.finalSec) + '</b></div>';
+  return '<main class="in page"><div><span class="eyebrow">Hasil kuis</span><h1 style="font-size:clamp(28px,5vw,40px);margin-top:4px">' + esc(S.nama) + '</h1><p class="hint" style="font-size:15px">Kelas ' + esc(S.kelas) + '</p></div>' + statusNote() +
+    '<div class="res two"><section class="card ringbox"><div class="burst" aria-hidden="true">' + burst + '</div>' +
+    '<div style="position:relative"><svg class="ring' + (pass ? ' pass' : '') + '" viewBox="0 0 180 180" role="img" aria-label="Nilai ' + sc.nilai + ' dari 100"><circle class="tr" cx="90" cy="90" r="78"/><circle class="fg" id="ringfg" cx="90" cy="90" r="78" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + C.toFixed(1) + '" data-c="' + C.toFixed(1) + '" data-p="' + sc.nilai + '"/></svg>' +
+    '<div class="ringnum" style="top:0"><span id="numv" data-v="' + sc.nilai + '">0</span><small>Nilai</small></div></div>' +
+    '<span class="chip ' + (pass ? 'ok' : 'bad') + '">' + (pass ? 'Tuntas (KKM ' + KKM + ')' : 'Belum tuntas (KKM ' + KKM + ')') + '</span>' + dl + '</section>' +
+    '<div style="display:grid;gap:20px;min-width:0"><section class="card"><h2>Capaian per tujuan pembelajaran</h2><div class="bars">' + tp + '</div></section>' +
+    '<section class="card"><h2>Capaian per jenis kemampuan</h2><div class="bars">' + jn + '</div></section></div></div>' +
+    keyBlock(a, true) + '</main>';
+}
+function keyDist() {
+  var d = [0, 0, 0, 0, 0]; BANK.forEach(function (q) { d[q.k]++; });
+  return d.map(function (n, i) { return L[i] + ' = ' + n; }).join(' · ');
+}
+function keyBlock(a, mine) {
+  var grid = BANK.map(function (q, i) {
+    var c = 'kc';
+    if (a) { c += a[i] < 0 ? ' bl' : (a[i] === q.k ? ' ok' : ' no'); }
+    return '<div class="' + c + '" title="Soal ' + (i + 1) + '"><span>' + (i + 1) + '</span><b>' + L[q.k] + '</b></div>';
+  }).join('');
+  var f = S.kfilter;
+  var fb = [['all', 'Semua']].concat([1, 2, 3, 4, 5].map(function (k) { return ['tp' + k, 'TP ' + k]; }));
+  if (a) fb = fb.concat([['salah', 'Salah'], ['kosong', 'Kosong']]);
+  var chips = fb.map(function (x) { return '<button type="button" data-act="kf" data-f="' + x[0] + '" aria-pressed="' + (f === x[0]) + '">' + x[1] + '</button>'; }).join('');
+  var list = '', shown = 0;
+  BANK.forEach(function (q, i) {
+    var ok = a ? a[i] === q.k : null;
+    if (f.indexOf('tp') === 0 && q.tp !== +f.slice(2)) return;
+    if (f === 'salah' && !(a && a[i] >= 0 && !ok)) return;
+    if (f === 'kosong' && !(a && a[i] < 0)) return;
+    shown++;
+    var mark = a ? (a[i] < 0 ? '<span class="chip">Kosong</span>' : ok ? '<span class="chip ok">Benar</span>' : '<span class="chip bad">Salah</span>') : '';
+    var opts = q.o.map(function (t, k) {
+      var cl = 'xo' + (k === q.k ? ' key' : (a && a[i] === k ? ' mine' : ''));
+      var tag = k === q.k ? ' ✔ kunci' : (a && a[i] === k ? ' ✘ jawaban Anda' : '');
+      return '<div class="' + cl + '"><b>' + L[k] + '</b><span>' + esc(t) + (tag ? ' <em class="hint">' + tag + '</em>' : '') + '</span></div>';
+    }).join('');
+    list += '<details class="ex"><summary><span class="mono">Soal ' + (i + 1) + '</span><span class="chip ven">TP ' + q.tp + '</span><span class="chip">' + q.j + '</span><span class="chip">' + q.c + '</span><span class="chip ok">Kunci ' + L[q.k] + '</span>' + mark + '</summary><div class="body"><div class="stim">' + renderStim(q.s) + '</div><p class="qtext">' + esc(q.q) + '</p><div class="opts">' + opts + '</div><div class="expl"><b>Pembahasan.</b> ' + esc(q.e) + '</div></div></details>';
+  });
+  if (!shown) list = '<p class="empty">Tidak ada soal pada filter ini.</p>';
+  return '<section class="card"><h2>Lembar kunci jawaban</h2><p class="hint" style="margin-bottom:12px">Sebaran kunci: ' + keyDist() + (a ? ' · hijau = benar, merah = salah, putus-putus = kosong' : '') + '</p><div class="keygrid">' + grid + '</div>' +
+    (S.teacher ? '<p style="margin-top:14px"><button type="button" class="btn" data-act="dlkey">Unduh kunci (CSV)</button></p>' : '') + '</section>' +
+    '<section class="card"><h2>Pembahasan butir soal</h2><div class="filters" style="margin-bottom:12px">' + chips + '</div>' + list + '</section>';
+}
+function vKey() {
+  var a = S.teacher ? null : S.finalAns;
+  return '<main class="in page"><div><span class="eyebrow">' + (S.teacher ? 'Khusus guru' : 'Setelah mengumpulkan') + '</span><h1 style="font-size:clamp(28px,5vw,40px);margin-top:4px">Lembar kunci jawaban</h1></div>' + keyBlock(a, !S.teacher) + '</main>';
+}
+
+/* ---------- dashboard ---------- */
+function filteredRows() {
+  var q = S.q.trim().toLowerCase();
+  return S.rows.filter(function (r) { return (!S.ksel || r.kelas === S.ksel) && (!q || (String(r.nama || '') + ' ' + String(r.kelas || '')).toLowerCase().indexOf(q) >= 0); });
+}
+function nvHtml(n) { var c = n >= KKM ? 'hi' : (n < 50 ? 'lo' : ''); return '<span class="nv">' + n + '<i><s class="' + c + '" style="width:' + n + '%"></s></i></span>'; }
+function dashBody() {
+  if (!S.db) return '<div class="card empty">Basis data tidak tersedia pada tampilan ini, sehingga hasil murid tidak dapat ditampilkan.</div>';
+  if (S.rowsErr) return '<div class="card empty">Hasil tidak dapat dimuat (' + esc(S.rowsErr.code || 'galat') + '). Muat ulang halaman.</div>';
+  if (!S.rowsLoaded) return '<div class="card empty">Memuat hasil murid…' + (S.rowsSlow ? '<br>Sambungan lambat. Data yang tampil mungkin belum terbaru.' : '') + '</div>';
+  var rows = filteredRows();
+  if (!S.rows.length) return '<div class="card empty"><b>Belum ada murid yang mengumpulkan.</b><br>Bagikan tautan kuis kepada murid dengan akses Kontributor. Hasil akan muncul di sini secara langsung.</div>';
+  var ns = rows.map(function (r) { return +r.nilai || 0; });
+  var avg = ns.length ? Math.round(ns.reduce(function (a, b) { return a + b; }, 0) / ns.length * 10) / 10 : 0;
+  var mx = ns.length ? Math.max.apply(null, ns) : 0, mn = ns.length ? Math.min.apply(null, ns) : 0;
+  var tuntas = ns.filter(function (n) { return n >= KKM; }).length;
+  var stats = '<div class="stats"><div><b>' + rows.length + '</b><span>Peserta</span></div><div><b>' + avg + '</b><span>Rata-rata</span></div><div><b>' + mx + '</b><span>Tertinggi</span></div><div><b>' + mn + '</b><span>Terendah</span></div><div><b>' + (rows.length ? Math.round(tuntas * 100 / rows.length) : 0) + '%</b><span>Tuntas (≥' + KKM + ')</span></div></div>';
+  var tr = rows.map(function (r) {
+    var open = S.openRow === r.id, det = '';
+    if (open) {
+      var a = parseAns(r.jawaban), sc = score(a);
+      var g = BANK.map(function (q, i) { var c = 'kc' + (a[i] < 0 ? ' bl' : (a[i] === q.k ? ' ok' : ' no')); return '<div class="' + c + '"><span>' + (i + 1) + '</span><b>' + (a[i] < 0 ? '–' : L[a[i]]) + '</b></div>'; }).join('');
+      var tps = Object.keys(TPS).map(function (k) { return '<span class="chip ven">TP ' + k + ': ' + sc.tp[k].b + '/' + sc.tp[k].n + '</span>'; }).join(' ');
+      var del = S.delAsk === r.id ? '<span class="hint">Hapus hasil ini agar murid dapat mengulang?</span> <button type="button" class="btn art" data-act="delok" data-id="' + esc(r.id) + '">Ya, hapus</button> <button type="button" class="btn" data-act="delno">Batal</button>' : '<button type="button" class="btn" data-act="del" data-id="' + esc(r.id) + '">Hapus hasil</button>';
+      det = '<tr class="detail"><td colspan="6"><div>' + tps + '</div><div class="keygrid">' + g + '</div><div>' + del + '</div></td></tr>';
+    }
+    return '<tr class="r" data-act="row" data-id="' + esc(r.id) + '" tabindex="0" aria-expanded="' + open + '"><td class="nm">' + esc(r.nama) + '</td><td>' + esc(r.kelas) + '</td><td>' + nvHtml(+r.nilai || 0) + '</td><td class="mono">' + esc(r.benar) + '/' + N + '</td><td class="mono">' + esc(fmtDur(+r.detik || 0)) + '</td><td>' + esc(fmtDate(r.dikirim)) + '</td></tr>' + det;
+  }).join('');
+  var table = '<div class="card"><h2>Daftar hasil</h2><div class="scroll"><table class="tbl"><thead><tr><th>Nama</th><th>Kelas</th><th>Nilai</th><th>Benar</th><th>Waktu</th><th>Dikumpulkan</th></tr></thead><tbody>' + tr + '</tbody></table></div><p class="hint" style="margin-top:8px">Klik baris untuk melihat jawaban per soal.</p></div>';
+  var items = BANK.map(function (q, i) {
+    var n = rows.length, b = rows.filter(function (r) { return parseAns(r.jawaban)[i] === q.k; }).length, p = n ? Math.round(b * 100 / n) : 0;
+    var c = p >= 80 ? 'hi' : (p < 40 ? 'lo' : '');
+    return '<div class="it" title="Soal ' + (i + 1) + ': ' + p + '% menjawab benar"><span>' + (i + 1) + '</span><div class="t"><i class="' + c + '" style="width:' + p + '%"></i></div><span>' + p + '%</span></div>';
+  }).join('');
+  var byk = {};
+  rows.forEach(function (r) { var k = r.kelas || '-'; (byk[k] = byk[k] || []).push(+r.nilai || 0); });
+  var kl = Object.keys(byk).sort().map(function (k) { var v = byk[k], m = Math.round(v.reduce(function (a, b) { return a + b; }, 0) / v.length * 10) / 10; return '<div class="bar2"><span>' + esc(k) + ' <small class="hint">(' + v.length + ' murid)</small></span><b>' + m + '</b><div class="t"><i class="' + (m >= KKM ? 'hi' : (m < 50 ? 'lo' : '')) + '" style="width:' + m + '%"></i></div></div>'; }).join('');
+  return '<div class="card">' + stats + '</div>' + table +
+    '<div class="split"><section class="card"><h2>Rata-rata per kelas</h2><div class="bars">' + kl + '</div></section>' +
+    '<section class="card"><h2>Analisis butir soal</h2><p class="hint" style="margin-bottom:10px">Persentase murid yang menjawab benar. Merah di bawah 40% (sulit), hijau di atas 80% (mudah).</p><div class="items">' + items + '</div></section></div>';
+}
+function vDash() {
+  var ks = {}; S.rows.forEach(function (r) { if (r.kelas) ks[r.kelas] = 1; });
+  var opts = '<option value="">Semua kelas</option>' + Object.keys(ks).sort().map(function (k) { return '<option value="' + esc(k) + '"' + (S.ksel === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
+  return '<main class="in page"><div><span class="eyebrow">Khusus guru</span><h1 style="font-size:clamp(28px,5vw,40px);margin-top:4px">Hasil murid</h1></div>' +
+    '<div class="tools"><input id="srch" type="search" placeholder="Cari nama atau kelas" value="' + esc(S.q) + '" aria-label="Cari"><select id="ksel" aria-label="Filter kelas">' + opts + '</select><span class="sp"></span><button type="button" class="btn" data-act="dlres">Unduh hasil (CSV)</button></div>' +
+    '<div id="dbody" style="display:grid;gap:20px">' + dashBody() + '</div></main>';
+}
+function refreshDash() { var d = $('#dbody'); if (d && S.view === 'dash') d.innerHTML = dashBody(); else if (S.view === 'dash') render(); }
+
+/* ---------- render ---------- */
+function render() {
+  var v = S.view, main = '';
+  if (v === 'start') main = vStart();
+  else if (v === 'quiz') main = vQuiz();
+  else if (v === 'result' && S.finalAns) main = vResult();
+  else if (v === 'key') main = vKey();
+  else if (v === 'dash') main = vDash();
+  else main = vStart();
+  app.innerHTML = head() + main;
+  if (v === 'quiz') { updateProg(); tick(); }
+  if (v === 'result') animateResult();
+  window.scrollTo(0, 0);
+}
+function animateResult() {
+  var fg = $('#ringfg'), nv = $('#numv');
+  document.querySelectorAll('.bar2 .t i[data-w]').forEach(function (el) { el.style.width = '0%'; });
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      if (fg) { var c = +fg.getAttribute('data-c'), p = +fg.getAttribute('data-p'); fg.style.strokeDashoffset = (c * (1 - p / 100)).toFixed(1); }
+      document.querySelectorAll('.bar2 .t i[data-w]').forEach(function (el) { el.style.width = el.getAttribute('data-w') + '%'; });
+    });
+  });
+  if (nv) {
+    var to = +nv.getAttribute('data-v');
+    if (reduced()) { nv.textContent = to; return; }
+    var st = performance.now();
+    (function step(t) { var k = Math.min(1, (t - st) / 1100); nv.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); })(st);
+  }
+}
+
+/* ---------- quiz flow ---------- */
+function tick() {
+  var el = $('#clock'); if (!el || !S.started) return;
+  var left = Math.max(0, Math.round((S.deadline - Date.now()) / 1000));
+  el.textContent = fmtTime(left);
+  el.className = 'clock' + (left <= 300 ? ' crit' : (left <= 600 ? ' low' : ''));
+  if (left <= 0) { toast('Waktu habis. Jawaban dikumpulkan otomatis.'); kumpulkan(); }
+}
+function startQuiz() {
+  var n = ($('#nama') || {}).value || S.nama, k = ($('#kelas') || {}).value || S.kelas;
+  n = n.trim(); k = k.trim();
+  if (S.teacher) { n = n || 'Guru (pratinjau)'; k = k || 'Pratinjau'; }
+  if (n.length < 3) { S.formErr = 'Tuliskan nama lengkap Anda (minimal 3 huruf).'; var e = $('#ferr'); if (e) e.textContent = S.formErr; var f = $('#nama'); if (f) f.focus(); return; }
+  if (!k) { S.formErr = 'Tuliskan kelas Anda.'; var e2 = $('#ferr'); if (e2) e2.textContent = S.formErr; var f2 = $('#kelas'); if (f2) f2.focus(); return; }
+  S.formErr = ''; S.nama = n; S.kelas = k;
+  S.ans = new Array(N).fill(-1); S.flag = new Array(N).fill(false); S.idx = 0;
+  S.t0 = Date.now(); S.deadline = S.t0 + DURASI * 1000; S.started = true; S.view = 'quiz';
+  persist(); runTimer(); render();
+}
+function runTimer() { clearInterval(timer); timer = setInterval(tick, 1000); }
+function go(i) { S.idx = Math.max(0, Math.min(N - 1, i)); refreshQuiz(); window.scrollTo(0, 0); }
+function pick(k) { S.ans[S.idx] = k; refreshQuiz(); }
+function openConfirm() {
+  var done = S.ans.filter(function (x) { return x >= 0; }).length, fl = S.flag.filter(Boolean).length, left = N - done;
+  $('#modal').innerHTML = '<div class="veil" data-act="mcancel"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">Kumpulkan jawaban?</h2><p>' + done + ' soal terjawab' + (left ? ', <b>' + left + ' belum dijawab</b>' : '') + (fl ? ', ' + fl + ' ditandai ragu' : '') + '. Setelah dikumpulkan, jawaban tidak dapat diubah.</p><div class="row"><button type="button" class="btn" data-act="mcancel">Kembali memeriksa</button><button type="button" class="btn art" data-act="mok">Kumpulkan sekarang</button></div></div></div>';
+  var b = $('#modal .btn'); if (b) b.focus();
+}
+function closeModal() { $('#modal').innerHTML = ''; }
+async function kumpulkan() {
+  if (!S.started) return;
+  closeModal(); clearInterval(timer);
+  S.finalAns = S.ans.slice(); S.finalSec = Math.max(0, Math.min(DURASI, Math.round((Date.now() - S.t0) / 1000)));
+  S.started = false; clearProgress(); S.view = 'result';
+  var sc = score(S.finalAns);
+  if (S.teacher) { S.status = 'preview'; render(); return; }
+  if (!S.db || !S.uid) { S.status = 'local'; render(); return; }
+  if (S.canWrite === false) { S.status = 'readonly'; render(); return; }
+  S.status = 'saving'; render();
+  await kirim(sc);
+}
+async function kirim(sc) {
+  sc = sc || score(S.finalAns);
+  var data = { nama: S.nama.slice(0, 80), kelas: S.kelas.slice(0, 30), jawaban: ansStr(S.finalAns), benar: sc.b, nilai: sc.nilai, detik: S.finalSec, dikirim: new Date().toISOString(), v: 1 };
+  var ref = S.db.doc('hasil/' + S.uid);
+  try { await ref.set(data); S.stored = data; S.status = 'saved'; }
+  catch (e) {
+    if (e && e.code === 'unavailable') {
+      await sleep(700 + Math.random() * 700);
+      try { await ref.set(data); S.stored = data; S.status = 'saved'; } catch (e2) { S.status = 'error'; }
+    } else if (e && e.code === 'invalid_argument') { S.status = 'readonly'; }
+    else { S.status = 'error'; }
+  }
+  if (S.view === 'result') render();
+}
+function resultText() {
+  var sc = score(S.finalAns);
+  return 'Hasil Kuis Sirkulasi Darah (Biologi XI)\nNama: ' + S.nama + '\nKelas: ' + S.kelas + '\nNilai: ' + sc.nilai + ' (benar ' + sc.b + ' dari ' + N + ')\nWaktu: ' + fmtDur(S.finalSec) + '\nJawaban: ' + ansStr(S.finalAns);
+}
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); toast('Hasil disalin'); }
+  catch (e) {
+    $('#modal').innerHTML = '<div class="veil"><div class="dlg" role="dialog" aria-modal="true"><h2>Salin hasil</h2><p>Pilih teks di bawah lalu salin secara manual.</p><textarea id="cpt" readonly></textarea><div class="row"><button type="button" class="btn" data-act="mcancel">Tutup</button></div></div></div>';
+    var ta = $('#cpt'); ta.value = t; ta.focus(); ta.select();
+  }
+}
+
+/* ---------- downloads ---------- */
+function csvCell(v) { var s = String(v == null ? '' : v); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; }
+async function saveCsv(name, rows) {
+  var text = '﻿' + rows.map(function (r) { return r.map(csvCell).join(','); }).join('\r\n');
+  try {
+    var d = await window.claude.use('downloads');
+    if (!d) { toast('Unduhan tidak tersedia di tampilan ini'); return; }
+    await d.save({ filename: name, data: text });
+  } catch (e) { if (!e || e.code !== 'declined') toast('Unduhan tidak dapat dilakukan'); }
+}
+function dlKey() { saveCsv('kunci-jawaban-sirkulasi-darah.csv', [['No', 'TP', 'Jenis', 'Level', 'Kunci']].concat(BANK.map(function (q, i) { return [i + 1, 'TP' + q.tp, q.j, q.c, L[q.k]]; }))); }
+function dlRes() {
+  var h = ['Nama', 'Kelas', 'Nilai', 'Benar', 'Waktu (detik)', 'Dikumpulkan'].concat(BANK.map(function (_, i) { return 'S' + (i + 1); }));
+  var rows = filteredRows().map(function (r) { var a = parseAns(r.jawaban); return [r.nama, r.kelas, r.nilai, r.benar, r.detik, r.dikirim].concat(a.map(function (x) { return x < 0 ? '' : L[x]; })); });
+  if (!rows.length) { toast('Belum ada data untuk diunduh'); return; }
+  rows.unshift(['KUNCI', '', '', '', '', ''].concat(BANK.map(function (q) { return L[q.k]; })));
+  saveCsv('hasil-kuis-sirkulasi-darah.csv', [h].concat(rows));
+}
+
+/* ---------- teacher subscription ---------- */
+function subRows() {
+  if (!S.db || S.sub) return;
+  var t = setTimeout(function () { if (!S.rowsLoaded) { S.rowsSlow = true; refreshDash(); } }, 10000);
+  try {
+    S.sub = S.db.collection('hasil').orderBy('dikirim', 'desc').limit(1000).onSnapshot(function (snap) {
+      clearTimeout(t); S.rows = snap.docs.map(function (d) { var o = d.data() || {}; return Object.assign({ id: d.id }, o); }); S.rowsLoaded = true; S.rowsSlow = false; S.rowsErr = null;
+      if (S.view === 'dash') { var keep = $('#ksel'); if (keep) { refreshDash(); } else render(); }
+    }, function (err) { clearTimeout(t); S.rowsErr = err; S.rowsLoaded = true; refreshDash(); });
+  } catch (e) { clearTimeout(t); S.rowsErr = e; S.rowsLoaded = true; }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', function (ev) {
+  var el = ev.target.closest ? ev.target.closest('[data-act]') : null; if (!el) return;
+  var act = el.getAttribute('data-act');
+  if (act === 'mcancel' && el.classList.contains('veil') && ev.target !== el) return;
+  if (act === 'row' && ev.target.closest('button')) return;
+  switch (act) {
+    case 'start': startQuiz(); break;
+    case 'pick': pick(+el.getAttribute('data-k')); break;
+    case 'prev': go(S.idx - 1); break;
+    case 'next': go(S.idx + 1); break;
+    case 'go': go(+el.getAttribute('data-i')); break;
+    case 'flag': S.flag[S.idx] = !S.flag[S.idx]; refreshQuiz(); break;
+    case 'clear': S.ans[S.idx] = -1; refreshQuiz(); break;
+    case 'submit': openConfirm(); break;
+    case 'mok': kumpulkan(); break;
+    case 'mcancel': closeModal(); break;
+    case 'tab':
+      var v = el.getAttribute('data-v');
+      if (v === 'start') S.view = S.started ? 'quiz' : 'start'; else S.view = v;
+      if (v === 'dash') subRows();
+      render(); break;
+    case 'kf': S.kfilter = el.getAttribute('data-f'); var y = window.scrollY; render(); window.scrollTo(0, y); break;
+    case 'retry': S.status = 'saving'; render(); kirim(); break;
+    case 'copy': copyText(resultText()); break;
+    case 'row': var id = el.getAttribute('data-id'); S.openRow = S.openRow === id ? null : id; S.delAsk = null; refreshDash(); break;
+    case 'del': S.delAsk = el.getAttribute('data-id'); refreshDash(); break;
+    case 'delno': S.delAsk = null; refreshDash(); break;
+    case 'delok':
+      (async function (id2) { try { await S.db.doc('hasil/' + id2).delete(); toast('Hasil dihapus'); S.delAsk = null; S.openRow = null; } catch (e) { toast('Gagal menghapus'); } })(el.getAttribute('data-id')); break;
+    case 'dlkey': dlKey(); break;
+    case 'dlres': dlRes(); break;
+  }
+});
+document.addEventListener('input', function (ev) {
+  var t = ev.target;
+  if (t.id === 'nama') { S.nama = t.value; S.formErr = ''; var e = $('#ferr'); if (e) e.textContent = ''; }
+  else if (t.id === 'kelas') { S.kelas = t.value; S.formErr = ''; var e2 = $('#ferr'); if (e2) e2.textContent = ''; }
+  else if (t.id === 'srch') { S.q = t.value; var d = $('#dbody'); if (d) d.innerHTML = dashBody(); }
+});
+document.addEventListener('change', function (ev) { if (ev.target.id === 'ksel') { S.ksel = ev.target.value; var d = $('#dbody'); if (d) d.innerHTML = dashBody(); } });
+document.addEventListener('keydown', function (ev) {
+  var t = ev.target, tag = (t && t.tagName) || '';
+  if (ev.key === 'Escape' && $('#modal').firstChild) { closeModal(); return; }
+  if ((ev.key === 'Enter' || ev.key === ' ') && t.getAttribute && t.getAttribute('data-act') === 'row') { ev.preventDefault(); t.click(); return; }
+  if (S.view !== 'quiz' || $('#modal').firstChild || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  var k = ev.key.toLowerCase(), pos = 'abcde'.indexOf(k);
+  if (pos < 0 && /^[1-5]$/.test(k)) pos = +k - 1;
+  if (pos >= 0) { ev.preventDefault(); pick(pos); }
+  else if (ev.key === 'ArrowRight') { ev.preventDefault(); go(S.idx + 1); }
+  else if (ev.key === 'ArrowLeft') { ev.preventDefault(); go(S.idx - 1); }
+});
+
+/* ---------- boot ---------- */
+async function boot() {
+  var had = restore();
+  if (had) { S.view = 'quiz'; if (Date.now() < S.deadline) runTimer(); }
+  render();
+  try {
+    var cl = window.claude;
+    if (cl && cl.use) {
+      var u = await cl.use('user');
+      if (u) { S.teacher = !!(await u.canEdit()); S.uid = await u.id(); S.canWrite = await u.can('data.write'); }
+      S.db = await cl.use('db');
+    }
+  } catch (e) {}
+  S.ready = true;
+  if (S.teacher) { subRows(); }
+  else if (S.db && S.uid) {
+    try {
+      var d = await S.db.doc('hasil/' + S.uid).get();
+      if (d.exists) {
+        var s = d.data(); S.stored = s; clearProgress(); clearInterval(timer); S.started = false;
+        S.nama = s.nama || ''; S.kelas = s.kelas || ''; S.finalAns = parseAns(s.jawaban); S.finalSec = +s.detik || 0; S.status = 'prev'; S.view = 'result';
+      }
+    } catch (e) {}
+  }
+  if (S.started && Date.now() >= S.deadline) { await kumpulkan(); return; }
+  if (S.view === 'start' || S.view === 'result') render(); else { var wb = $('.top'); if (wb) { /* quiz berjalan: tidak perlu render ulang */ } }
+}
+boot();
+})();
+</script>
+
+</body></html>
